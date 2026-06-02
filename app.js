@@ -138,7 +138,9 @@ const state = {
 const viewTitles = {
   search: "Buscar estacionamentos",
   results: "Comparar opções",
+  recommended: "Melhor opção recomendada",
   route: "Resumo da rota",
+  alternatives: "Alternativas após estacionar",
   traffic: "Mapa de trânsito",
   history: "Histórico",
 };
@@ -264,7 +266,7 @@ function renderResults() {
           <h3>Estacionamentos encontrados</h3>
           <p>Comparação por preço, caminhada, trânsito, disponibilidade e score.</p>
         </div>
-        <button class="secondary-button" type="button" data-view-jump="route">Ver rota</button>
+        <button class="secondary-button" type="button" data-view-jump="recommended">Ver melhor opção</button>
       </div>
 
       <div class="chip-row" aria-label="Ordenação">
@@ -282,6 +284,60 @@ function renderResults() {
     <section class="section">
       <div class="parking-list">
         ${options.map((option) => parkingCard(option, option.id === recommended.id)).join("")}
+      </div>
+    </section>
+  `;
+
+  renderRecommendationContext();
+}
+
+function renderRecommended() {
+  const recommended = getRecommendedOption();
+  const selected = getSelectedParking();
+  const activeParking = selected.id === recommended.id ? recommended : selected;
+
+  mainView.innerHTML = `
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h3>Melhor opção para você</h3>
+          <p>Score calculado com mobilidade, fluxo de trânsito, custo, proximidade e disponibilidade.</p>
+        </div>
+        <button class="secondary-button" type="button" data-view-jump="route">Ver rota</button>
+      </div>
+
+      <div class="recommendation-hero">
+        <div class="score-badge">
+          <strong>${calculateScore(activeParking)}</strong>
+          <span>score</span>
+        </div>
+        <div>
+          <h3>${activeParking.name}</h3>
+          <p>${activeParking.address}</p>
+          <div class="chip-row">
+            ${activeParking.id === recommended.id ? `<span class="status-pill status-low">Melhor escolha</span>` : ""}
+            ${statusPill(activeParking.traffic)}
+            ${availabilityPill(activeParking.availability)}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h3>Critérios avaliados</h3>
+          <p>A recomendação favorece estacionar fora da área crítica e terminar o deslocamento por outro modal.</p>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-item"><span>Preço</span><strong>${formatCurrency(activeParking.price)}</strong></div>
+        <div class="detail-item"><span>Distância final</span><strong>${activeParking.distanceMeters} m</strong></div>
+        <div class="detail-item"><span>Tempo a pé</span><strong>${activeParking.walkMinutes} min</strong></div>
+        <div class="detail-item"><span>Tempo de carro</span><strong>${activeParking.driveMinutes} min</strong></div>
+        <div class="detail-item"><span>Disponibilidade</span><strong>${activeParking.availability}</strong></div>
+        <div class="detail-item"><span>Ocupação estimada</span><strong>${activeParking.occupancy}%</strong></div>
       </div>
     </section>
   `;
@@ -318,7 +374,6 @@ function parkingCard(option, recommended) {
 function renderRoute() {
   const parking = getSelectedParking();
   const mode = getSelectedMode();
-  const recommendedMode = getRecommendedMode(parking);
   const totalMinutes = getTotalRouteMinutes(parking, mode);
 
   mainView.innerHTML = `
@@ -354,7 +409,7 @@ function renderRoute() {
             <h4>Seguir até ${state.destination}</h4>
             <p>${mode.minutes} min usando ${mode.label.toLowerCase()}, custo estimado ${mode.cost}.</p>
           </div>
-          <button class="text-button" type="button" data-view-jump="results">Trocar opção</button>
+          <button class="text-button" type="button" data-view-jump="alternatives">Ver modais</button>
         </div>
       </div>
 
@@ -367,13 +422,23 @@ function renderRoute() {
         <strong>${totalMinutes} min</strong>
       </div>
     </section>
+  `;
 
+  renderRecommendationContext();
+}
+
+function renderAlternatives() {
+  const parking = getSelectedParking();
+  const recommendedMode = getRecommendedMode(parking);
+
+  mainView.innerHTML = `
     <section class="section">
       <div class="section-header">
         <div>
           <h3>Alternativas após estacionar</h3>
-          <p>Compare o trecho final sem usar o carro dentro do Recife Antigo. Recomendamos ${recommendedMode.label.toLowerCase()} para esta rota.</p>
+          <p>Compare o trecho final a partir de ${parking.name}, sem circular de carro dentro do Recife Antigo. Recomendamos ${recommendedMode.label.toLowerCase()} para esta rota.</p>
         </div>
+        <button class="secondary-button" type="button" data-view-jump="route">Voltar para rota</button>
       </div>
       <div class="mode-alternatives">
         ${modeOptions.map((item) => `
@@ -386,9 +451,7 @@ function renderRoute() {
               <div class="mini-item"><span>Status</span><strong>${item.id === recommendedMode.id ? "Recomendado" : "Disponível"}</strong></div>
               <div class="mini-item"><span>Total rota</span><strong>${getTotalRouteMinutes(parking, item)} min</strong></div>
             </div>
-            <button class="text-button" type="button" data-mode="${item.id}">
-              ${item.id === state.selectedMode ? "Selecionado" : "Escolher"}
-            </button>
+            <button class="select-link text-button" type="button" data-mode="${item.id}">${item.id === state.selectedMode ? "Modal atual" : "Escolher modal"}</button>
           </article>
         `).join("")}
       </div>
@@ -574,7 +637,9 @@ function render() {
 
   if (state.view === "search") renderSearch();
   if (state.view === "results") renderResults();
+  if (state.view === "recommended") renderRecommended();
   if (state.view === "route") renderRoute();
+  if (state.view === "alternatives") renderAlternatives();
   if (state.view === "traffic") renderTraffic();
   if (state.view === "history") renderHistory();
 }
@@ -599,6 +664,9 @@ document.addEventListener("click", (event) => {
 
   if (mode) {
     state.selectedMode = mode.dataset.mode;
+    if (state.view === "alternatives") {
+      state.view = "route";
+    }
     render();
   }
 
@@ -609,7 +677,7 @@ document.addEventListener("click", (event) => {
 
   if (parking) {
     state.selectedParkingId = parking.dataset.selectParking;
-    state.view = "route";
+    state.view = "recommended";
     render();
   }
 
