@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Parking Zero</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Resumo do projeto">
+        <div>
+          <p class="eyebrow">Recife Antigo</p>
+          <h1>Parking Zero</h1>
+          <p class="sidebar-copy">
+            Estacione em um ponto estratégico e siga até o destino sem circular
+            de carro pela área mais congestionada.
+          </p>
+        </div>
+
+        <div class="sidebar-metrics" aria-label="Indicadores simulados">
+          <div>
+            <span>Fluxo atual</span>
+            <strong>Moderado</strong>
+          </div>
+          <div>
+            <span>Economia média</span>
+            <strong>18 min</strong>
+          </div>
+          <div>
+            <span>Opções</span>
+            <strong>4 vagas</strong>
+          </div>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Protótipo acadêmico</p>
+            <h2 id="view-title">Buscar estacionamentos</h2>
+          </div>
+          <button class="ghost-button" id="reset-button" type="button">
+            Limpar busca
+          </button>
+        </header>
+
+        <section class="content-grid">
+          <div class="primary-panel" id="main-view"></div>
+          <aside class="context-panel" id="context-view"></aside>
+        </section>
+
+        <nav class="bottom-nav" aria-label="Navegação principal">
+          <button class="nav-item is-active" type="button" data-view="search">
+            <span class="nav-icon" aria-hidden="true">P</span>
+            Buscar
+          </button>
+          <button class="nav-item" type="button" data-view="results">
+            <span class="nav-icon" aria-hidden="true">L</span>
+            Opções
+          </button>
+          <button class="nav-item" type="button" data-view="route">
+            <span class="nav-icon" aria-hidden="true">R</span>
+            Rota
+          </button>
+          <button class="nav-item" type="button" data-view="traffic">
+            <span class="nav-icon" aria-hidden="true">T</span>
+            Trânsito
+          </button>
+          <button class="nav-item" type="button" data-view="history">
+            <span class="nav-icon" aria-hidden="true">H</span>
+            Histórico
+          </button>
+        </nav>
+      </main>
+    </div>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
