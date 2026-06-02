@@ -463,6 +463,37 @@ button {
   color: var(--muted);
 }
 
+.route-total-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 8px;
+  background: var(--strong);
+  color: #ffffff;
+}
+
+.route-total-card span {
+  display: block;
+  margin-bottom: 5px;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.route-total-card p {
+  margin: 6px 0 0;
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.route-total-card > strong {
+  flex: 0 0 auto;
+  font-size: 1.8rem;
+}
+
 .mode-alternatives {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -470,9 +501,16 @@ button {
 }
 
 .alternative-card {
+  display: grid;
+  gap: 12px;
   padding: 16px;
   border: 1px solid var(--line);
   border-radius: 8px;
+}
+
+.alternative-card.is-selected {
+  border-color: rgba(31, 143, 95, 0.55);
+  background: var(--green-soft);
 }
 
 .alternative-card h4 {
@@ -555,9 +593,39 @@ button {
   bottom: 32px;
 }
 
+.zone-limited {
+  right: 10%;
+  bottom: 34px;
+}
+
 .traffic-zone strong {
   display: block;
   margin-bottom: 8px;
+}
+
+.critical-list {
+  display: grid;
+  gap: 12px;
+}
+
+.critical-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.critical-item h4 {
+  margin: 0 0 5px;
+}
+
+.critical-item p {
+  margin: 0;
+  color: var(--muted);
 }
 
 .history-list {
@@ -681,8 +749,15 @@ button {
   .parking-card,
   .recommendation-hero,
   .route-step,
+  .route-total-card,
+  .critical-item,
   .history-item {
     grid-template-columns: 1fr;
+  }
+
+  .route-total-card {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .mode-grid,

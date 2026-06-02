@@ -19,9 +19,9 @@ Uber, shuttle ou ônibus.
 - Lista de estacionamentos encontrados.
 - Comparação por score, preço, distância e trânsito.
 - Recomendação automática da melhor opção.
-- Resumo da rota em etapas.
-- Alternativas de mobilidade após estacionar.
-- Mapa de trânsito simulado.
+- Resumo da rota em etapas com tempo total estimado.
+- Alternativas de mobilidade após estacionar, com recomendação de troca modal.
+- Mapa de trânsito simulado com áreas críticas e baixa disponibilidade.
 - Histórico local de rotas salvas.
 
 ## Como abrir

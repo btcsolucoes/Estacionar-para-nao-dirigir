@@ -50,11 +50,46 @@ const parkingOptions = [
 ];
 
 const modeOptions = [
-  { id: "walk", label: "A pé", icon: "A", minutes: 5, cost: "R$ 0,00" },
-  { id: "bike", label: "Bike", icon: "B", minutes: 3, cost: "R$ 4,00" },
-  { id: "uber", label: "Uber", icon: "U", minutes: 4, cost: "R$ 11,00" },
-  { id: "shuttle", label: "Shuttle", icon: "S", minutes: 7, cost: "R$ 0,00" },
-  { id: "bus", label: "Ônibus", icon: "O", minutes: 10, cost: "R$ 4,10" },
+  {
+    id: "walk",
+    label: "A pé",
+    icon: "A",
+    minutes: 5,
+    cost: "R$ 0,00",
+    impact: "Mais rápido e econômico para um trecho final curto.",
+  },
+  {
+    id: "bike",
+    label: "Bike",
+    icon: "B",
+    minutes: 3,
+    cost: "R$ 4,00",
+    impact: "Boa opção quando há bicicleta compartilhada próxima.",
+  },
+  {
+    id: "uber",
+    label: "Uber",
+    icon: "U",
+    minutes: 4,
+    cost: "R$ 11,00",
+    impact: "Útil em chuva, bagagem ou baixa mobilidade.",
+  },
+  {
+    id: "shuttle",
+    label: "Shuttle",
+    icon: "S",
+    minutes: 7,
+    cost: "R$ 0,00",
+    impact: "Reduz carros individuais em eventos e horários de pico.",
+  },
+  {
+    id: "bus",
+    label: "Ônibus",
+    icon: "O",
+    minutes: 10,
+    cost: "R$ 4,10",
+    impact: "Alternativa coletiva para deslocamentos um pouco maiores.",
+  },
 ];
 
 const trafficLabels = {
@@ -62,6 +97,33 @@ const trafficLabels = {
   medium: { label: "Movimento moderado", className: "status-medium" },
   high: { label: "Muito congestionado", className: "status-high" },
 };
+
+const criticalAreas = [
+  {
+    name: "Marco Zero",
+    type: "Muito congestionado",
+    className: "status-high",
+    reason: "Alta concentração de veículos e pedestres no destino final.",
+  },
+  {
+    name: "Cais do Apolo",
+    type: "Congestionamento moderado",
+    className: "status-medium",
+    reason: "Retenção no acesso aos estacionamentos e áreas de embarque.",
+  },
+  {
+    name: "Paço Alfândega",
+    type: "Pouco movimento",
+    className: "status-low",
+    reason: "Ponto estratégico para parar o carro e seguir sem circular no centro.",
+  },
+  {
+    name: "Rua da Moeda",
+    type: "Baixa disponibilidade",
+    className: "status-limited",
+    reason: "Evitar procurar vaga avulsa nessa região no horário selecionado.",
+  },
+];
 
 const state = {
   view: "search",
@@ -125,6 +187,15 @@ function getSelectedMode() {
   return modeOptions.find((mode) => mode.id === state.selectedMode) || modeOptions[0];
 }
 
+function getTotalRouteMinutes(parking = getSelectedParking(), mode = getSelectedMode()) {
+  return parking.driveMinutes + mode.minutes;
+}
+
+function getRecommendedMode(parking = getSelectedParking()) {
+  if (parking.walkMinutes <= 8) return modeOptions.find((mode) => mode.id === "walk");
+  return modeOptions.find((mode) => mode.id === "bike");
+}
+
 function statusPill(traffic) {
   const status = trafficLabels[traffic];
   return `<span class="status-pill ${status.className}">${status.label}</span>`;
@@ -133,6 +204,10 @@ function statusPill(traffic) {
 function availabilityPill(availability) {
   const className = availability === "Baixa" ? "status-limited" : availability === "Média" ? "status-medium" : "status-low";
   return `<span class="status-pill ${className}">${availability} disponibilidade</span>`;
+}
+
+function typedPill(label, className) {
+  return `<span class="status-pill ${className}">${label}</span>`;
 }
 
 function renderSearch() {
@@ -299,6 +374,7 @@ function parkingCard(option, recommended) {
 function renderRoute() {
   const parking = getSelectedParking();
   const mode = getSelectedMode();
+  const totalMinutes = getTotalRouteMinutes(parking, mode);
 
   mainView.innerHTML = `
     <section class="section">
@@ -336,6 +412,15 @@ function renderRoute() {
           <button class="text-button" type="button" data-view-jump="alternatives">Ver modais</button>
         </div>
       </div>
+
+      <div class="route-total-card" aria-label="Tempo total estimado da rota">
+        <div>
+          <span>Tempo total estimado</span>
+          <strong>Deslocamento completo</strong>
+          <p>${parking.driveMinutes} min de carro + ${mode.minutes} min no trecho final.</p>
+        </div>
+        <strong>${totalMinutes} min</strong>
+      </div>
     </section>
   `;
 
@@ -344,24 +429,27 @@ function renderRoute() {
 
 function renderAlternatives() {
   const parking = getSelectedParking();
+  const recommendedMode = getRecommendedMode(parking);
 
   mainView.innerHTML = `
     <section class="section">
       <div class="section-header">
         <div>
           <h3>Alternativas após estacionar</h3>
-          <p>Compare o trecho final a partir de ${parking.name}, sem circular de carro dentro do Recife Antigo.</p>
+          <p>Compare o trecho final a partir de ${parking.name}. Recomendamos ${recommendedMode.label.toLowerCase()} para esta rota.</p>
         </div>
         <button class="secondary-button" type="button" data-view-jump="route">Voltar para rota</button>
       </div>
       <div class="mode-alternatives">
         ${modeOptions.map((item) => `
-          <article class="alternative-card">
+          <article class="alternative-card ${item.id === state.selectedMode ? "is-selected" : ""}">
             <h4>${item.label}</h4>
-            <p>${item.minutes} min até o destino final.</p>
+            <p>${item.impact}</p>
             <div class="mini-grid">
+              <div class="mini-item"><span>Tempo</span><strong>${item.minutes} min</strong></div>
               <div class="mini-item"><span>Custo</span><strong>${item.cost}</strong></div>
-              <div class="mini-item"><span>Status</span><strong>${item.id === state.selectedMode ? "Selecionado" : "Disponível"}</strong></div>
+              <div class="mini-item"><span>Status</span><strong>${item.id === recommendedMode.id ? "Recomendado" : "Disponível"}</strong></div>
+              <div class="mini-item"><span>Total rota</span><strong>${getTotalRouteMinutes(parking, item)} min</strong></div>
             </div>
             <button class="select-link text-button" type="button" data-mode="${item.id}">${item.id === state.selectedMode ? "Modal atual" : "Escolher modal"}</button>
           </article>
@@ -379,7 +467,7 @@ function renderTraffic() {
       <div class="section-header">
         <div>
           <h3>Mapa de trânsito</h3>
-          <p>Visualização simulada do fluxo nos principais pontos do Recife Antigo.</p>
+          <p>Visualização simulada do fluxo, gargalos e baixa disponibilidade nos principais pontos do Recife Antigo.</p>
         </div>
       </div>
 
@@ -399,6 +487,30 @@ function renderTraffic() {
           <strong>Marco Zero</strong>
           ${statusPill("high")}
         </div>
+        <div class="traffic-zone zone-limited">
+          <strong>Rua da Moeda</strong>
+          ${typedPill("Baixa disponibilidade", "status-limited")}
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h3>Áreas críticas</h3>
+          <p>Use estes alertas para evitar circular de carro depois de chegar ao estacionamento.</p>
+        </div>
+      </div>
+      <div class="critical-list">
+        ${criticalAreas.map((area) => `
+          <article class="critical-item">
+            <div>
+              <h4>${area.name}</h4>
+              <p>${area.reason}</p>
+            </div>
+            ${typedPill(area.type, area.className)}
+          </article>
+        `).join("")}
       </div>
     </section>
   `;
@@ -414,6 +526,7 @@ function renderTraffic() {
         ${statusPill("low")}
         ${statusPill("medium")}
         ${statusPill("high")}
+        ${typedPill("Baixa disponibilidade", "status-limited")}
       </div>
     </section>
   `;
@@ -437,7 +550,7 @@ function renderHistory() {
             <article class="history-item">
               <div>
                 <h4>${item.parkingName}</h4>
-                <p>${item.destination} · ${item.modeLabel} · ${item.savedAt}</p>
+                <p>${item.destination} · ${item.modeLabel} · ${item.totalMinutes ? `${item.totalMinutes} min` : "tempo não registrado"} · ${item.savedAt}</p>
               </div>
               <strong>${item.score} pts</strong>
             </article>
@@ -478,6 +591,7 @@ function renderRecommendationContext() {
           <div class="detail-item"><span>Até o destino</span><strong>${parking.walkMinutes} min</strong></div>
           <div class="detail-item"><span>Depois de estacionar</span><strong>${mode.label}</strong></div>
           <div class="detail-item"><span>Custo final</span><strong>${mode.cost}</strong></div>
+          <div class="detail-item"><span>Tempo total</span><strong>${getTotalRouteMinutes(parking, mode)} min</strong></div>
         </div>
       </div>
     </section>
@@ -498,6 +612,7 @@ function saveHistory() {
     parkingName: parking.name,
     destination: state.destination,
     modeLabel: mode.label,
+    totalMinutes: getTotalRouteMinutes(parking, mode),
     score: calculateScore(parking),
     savedAt: now.toLocaleString("pt-BR", {
       day: "2-digit",
