@@ -56,7 +56,7 @@ const modeOptions = [
     icon: "A",
     minutes: 5,
     cost: "R$ 0,00",
-    impact: "Mais rápido e econômico para o trecho final curto.",
+    impact: "Mais rápido e econômico para um trecho final curto.",
   },
   {
     id: "bike",
@@ -415,8 +415,8 @@ function renderRoute() {
 
       <div class="route-total-card" aria-label="Tempo total estimado da rota">
         <div>
-          <span>Funcionalidade 6</span>
-          <strong>Tempo total estimado</strong>
+          <span>Tempo total estimado</span>
+          <strong>Deslocamento completo</strong>
           <p>${parking.driveMinutes} min de carro + ${mode.minutes} min no trecho final.</p>
         </div>
         <strong>${totalMinutes} min</strong>
@@ -436,7 +436,7 @@ function renderAlternatives() {
       <div class="section-header">
         <div>
           <h3>Alternativas após estacionar</h3>
-          <p>Compare o trecho final a partir de ${parking.name}, sem circular de carro dentro do Recife Antigo. Recomendamos ${recommendedMode.label.toLowerCase()} para esta rota.</p>
+          <p>Compare o trecho final a partir de ${parking.name}. Recomendamos ${recommendedMode.label.toLowerCase()} para esta rota.</p>
         </div>
         <button class="secondary-button" type="button" data-view-jump="route">Voltar para rota</button>
       </div>
@@ -467,7 +467,7 @@ function renderTraffic() {
       <div class="section-header">
         <div>
           <h3>Mapa de trânsito</h3>
-          <p>Visualização simulada do fluxo, bloqueios e baixa disponibilidade nos principais pontos do Recife Antigo.</p>
+          <p>Visualização simulada do fluxo, gargalos e baixa disponibilidade nos principais pontos do Recife Antigo.</p>
         </div>
       </div>
 
