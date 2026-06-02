@@ -592,7 +592,7 @@ button {
 
 .bottom-nav {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 10px;
   padding: 10px;
   border: 1px solid var(--line);
@@ -696,6 +696,8 @@ button {
 
   .bottom-nav {
     gap: 6px;
+    overflow-x: auto;
+    grid-template-columns: repeat(7, minmax(74px, 1fr));
   }
 
   .nav-item {
