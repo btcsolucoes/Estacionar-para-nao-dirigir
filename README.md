@@ -1,21 +1,33 @@
 # Parking Zero
 
-Aplicativo academico para ajudar usuarios a estacionar em pontos estrategicos e seguir pelo Recife Antigo sem continuar circulando de carro.
+Protótipo acadêmico para ajudar usuários a estacionar em pontos estratégicos e
+evitar circular de carro dentro do Recife Antigo.
 
 ## Objetivo
 
-O foco do projeto e reforcar a ideia: estacionar para nao dirigir dentro do Recife Antigo. O prototipo compara estacionamentos, estima rota, mostra areas criticas de transito e sugere troca modal apos estacionar.
+O aplicativo reforça a lógica central do projeto:
 
-## Telas implementadas
+> Estacionar para não dirigir dentro do Recife Antigo.
 
-- Busca inicial por destino, horario e modo preferido apos estacionar.
+O usuário informa o destino, compara estacionamentos próximos, recebe uma opção
+recomendada por score e escolhe como seguir depois de estacionar: a pé, bike,
+Uber, shuttle ou ônibus.
+
+## Funcionalidades implementadas
+
+- Busca inicial com destino, horário e modo de deslocamento após estacionar.
 - Lista de estacionamentos encontrados.
-- Melhor opcao recomendada.
-- Resumo da rota com tempo total estimado.
-- Alternativas apos estacionar: caminhada, bike, Uber, shuttle e transporte publico.
-- Mapa de transito com areas criticas.
-- Historico de rotas iniciadas.
+- Comparação por score, preço, distância e trânsito.
+- Recomendação automática da melhor opção.
+- Resumo da rota em etapas com tempo total estimado.
+- Alternativas de mobilidade após estacionar, com recomendação de troca modal.
+- Mapa de trânsito simulado com áreas críticas e baixa disponibilidade.
+- Histórico local de rotas salvas.
 
 ## Como abrir
 
-Abra o arquivo `index.html` no navegador.
+Abra o arquivo `index.html` diretamente no navegador.
+
+Esta primeira versão é estática, feita com HTML, CSS e JavaScript puro, porque o
+ambiente atual não tem Node.js/npm instalado. A estrutura pode ser migrada para
+React/Vite quando a equipe decidir.

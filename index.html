@@ -1,197 +1,80 @@
 <!doctype html>
 <html lang="pt-BR">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Parking Zero</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="app-shell">
-      <aside class="sidebar" aria-label="Navegacao principal">
-        <div class="brand">
-          <span class="brand-mark">PZ</span>
-          <div>
-            <strong>Parking Zero</strong>
-            <span>Recife Antigo</span>
-          </div>
+      <aside class="sidebar" aria-label="Resumo do projeto">
+        <div>
+          <p class="eyebrow">Recife Antigo</p>
+          <h1>Parking Zero</h1>
+          <p class="sidebar-copy">
+            Estacione em um ponto estratégico e siga até o destino sem circular
+            de carro pela área mais congestionada.
+          </p>
         </div>
 
-        <nav class="nav-list" aria-label="Telas do aplicativo">
-          <button class="nav-item active" data-screen="search" type="button">Buscar</button>
-          <button class="nav-item" data-screen="parkings" type="button">Estacionamentos</button>
-          <button class="nav-item" data-screen="recommended" type="button">Melhor opcao</button>
-          <button class="nav-item" data-screen="route" type="button">Resumo da rota</button>
-          <button class="nav-item" data-screen="modal" type="button">Pos-estacionar</button>
-          <button class="nav-item" data-screen="traffic" type="button">Mapa de transito</button>
-          <button class="nav-item" data-screen="history" type="button">Historico</button>
-        </nav>
+        <div class="sidebar-metrics" aria-label="Indicadores simulados">
+          <div>
+            <span>Fluxo atual</span>
+            <strong>Moderado</strong>
+          </div>
+          <div>
+            <span>Economia média</span>
+            <strong>18 min</strong>
+          </div>
+          <div>
+            <span>Opções</span>
+            <strong>4 vagas</strong>
+          </div>
+        </div>
       </aside>
 
-      <main class="content">
+      <main class="workspace">
         <header class="topbar">
           <div>
-            <p class="eyebrow">Estacionar para nao dirigir</p>
-            <h1 id="screen-title">Buscar destino</h1>
+            <p class="eyebrow">Protótipo acadêmico</p>
+            <h2 id="view-title">Buscar estacionamentos</h2>
           </div>
-          <div class="status-pill" id="traffic-status">Transito moderado</div>
+          <button class="ghost-button" id="reset-button" type="button">
+            Limpar busca
+          </button>
         </header>
 
-        <section class="screen active" id="search">
-          <div class="two-column">
-            <form class="panel search-panel" id="search-form">
-              <label>
-                Destino
-                <input id="destination" name="destination" value="Marco Zero" autocomplete="off" />
-              </label>
-
-              <label>
-                Horario previsto
-                <input id="arrival-time" name="arrival-time" type="time" value="18:30" />
-              </label>
-
-              <label>
-                Modo preferido apos estacionar
-                <select id="preferred-mode" name="preferred-mode">
-                  <option value="walk">Caminhada</option>
-                  <option value="bike">Bike</option>
-                  <option value="uber">Uber</option>
-                  <option value="shuttle">Shuttle</option>
-                  <option value="bus">Transporte publico</option>
-                </select>
-              </label>
-
-              <button class="primary-action" type="submit">Buscar estacionamentos</button>
-            </form>
-
-            <div class="panel summary-panel">
-              <p class="eyebrow">Recomendacao atual</p>
-              <h2 id="quick-recommendation">Estac. Paco Alfandega</h2>
-              <div class="metric-grid">
-                <div>
-                  <span>Tempo total</span>
-                  <strong id="quick-time">25 min</strong>
-                </div>
-                <div>
-                  <span>Custo estimado</span>
-                  <strong id="quick-cost">R$ 18,00</strong>
-                </div>
-                <div>
-                  <span>Trecho final</span>
-                  <strong id="quick-final">A pe</strong>
-                </div>
-              </div>
-            </div>
-          </div>
+        <section class="content-grid">
+          <div class="primary-panel" id="main-view"></div>
+          <aside class="context-panel" id="context-view"></aside>
         </section>
 
-        <section class="screen" id="parkings">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">Comparacao</p>
-              <h2>Estacionamentos encontrados</h2>
-            </div>
-            <span class="count-label" id="parking-count">3 opcoes</span>
-          </div>
-          <div class="cards-grid" id="parking-list"></div>
-        </section>
-
-        <section class="screen" id="recommended">
-          <div class="recommendation-layout">
-            <article class="panel recommendation-card">
-              <p class="eyebrow">Melhor opcao</p>
-              <h2 id="recommended-name">Estac. Paco Alfandega</h2>
-              <p id="recommended-reason">
-                Melhor equilibrio entre proximidade, disponibilidade e menor tempo de deslocamento final.
-              </p>
-              <div class="score-line">
-                <span>Indice Parking Zero</span>
-                <strong id="recommended-score">92/100</strong>
-              </div>
-              <button class="primary-action" data-go="route" type="button">Ver resumo da rota</button>
-            </article>
-
-            <div class="panel decision-panel">
-              <h3>Criterios avaliados</h3>
-              <ul class="criteria-list" id="criteria-list"></ul>
-            </div>
-          </div>
-        </section>
-
-        <section class="screen" id="route">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">Funcionalidade 6</p>
-              <h2>Resumo da rota</h2>
-            </div>
-            <button class="secondary-action" id="start-navigation" type="button">Iniciar navegacao</button>
-          </div>
-          <div class="route-stack" id="route-summary"></div>
-        </section>
-
-        <section class="screen" id="modal">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">Funcionalidade 4</p>
-              <h2>Alternativas apos estacionar</h2>
-            </div>
-            <span class="count-label" id="selected-parking-label">Estac. Paco Alfandega</span>
-          </div>
-          <div class="cards-grid" id="modal-options"></div>
-          <div class="panel modal-decision" id="modal-decision"></div>
-        </section>
-
-        <section class="screen" id="traffic">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">Funcionalidade 5</p>
-              <h2>Mapa de transito e areas criticas</h2>
-            </div>
-            <span class="status-pill compact">Atualizado 18:30</span>
-          </div>
-
-          <div class="traffic-layout">
-            <div class="map-panel" aria-label="Mapa simulado do Recife Antigo">
-              <div class="map-canvas">
-                <span class="street street-one"></span>
-                <span class="street street-two"></span>
-                <span class="street street-three"></span>
-                <span class="route-path"></span>
-                <span class="critical-line critical-red"></span>
-                <span class="critical-line critical-yellow"></span>
-                <span class="critical-zone"></span>
-                <span class="pin pin-user">Voce</span>
-                <span class="pin pin-parking">P</span>
-                <span class="pin pin-destination">Destino</span>
-              </div>
-              <div class="legend">
-                <span><i class="red"></i>Muito congestionado</span>
-                <span><i class="yellow"></i>Congestionado</span>
-                <span><i class="green"></i>Pouco movimento</span>
-                <span><i class="dark"></i>Baixa disponibilidade</span>
-              </div>
-            </div>
-
-            <div class="panel critical-panel">
-              <h3>Areas para evitar</h3>
-              <ul class="critical-list" id="critical-list"></ul>
-            </div>
-          </div>
-        </section>
-
-        <section class="screen" id="history">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">Consultas recentes</p>
-              <h2>Historico</h2>
-            </div>
-            <button class="secondary-action" id="clear-history" type="button">Limpar</button>
-          </div>
-          <div class="cards-grid" id="history-list"></div>
-        </section>
+        <nav class="bottom-nav" aria-label="Navegação principal">
+          <button class="nav-item is-active" type="button" data-view="search">
+            <span class="nav-icon" aria-hidden="true">P</span>
+            Buscar
+          </button>
+          <button class="nav-item" type="button" data-view="results">
+            <span class="nav-icon" aria-hidden="true">L</span>
+            Opções
+          </button>
+          <button class="nav-item" type="button" data-view="route">
+            <span class="nav-icon" aria-hidden="true">R</span>
+            Rota
+          </button>
+          <button class="nav-item" type="button" data-view="traffic">
+            <span class="nav-icon" aria-hidden="true">T</span>
+            Trânsito
+          </button>
+          <button class="nav-item" type="button" data-view="history">
+            <span class="nav-icon" aria-hidden="true">H</span>
+            Histórico
+          </button>
+        </nav>
       </main>
     </div>
 
-    <script src="script.js"></script>
+    <script src="app.js" defer></script>
   </body>
 </html>
