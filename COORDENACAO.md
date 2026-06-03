@@ -54,7 +54,14 @@ editado em tempo real por mais de uma pessoa/agente.
 ## O que ainda falta
 
 - Receber ou confirmar o escopo das funções 9 e 10 com Vinicius.
-- Fazer validação visual final em navegador assim que a equipe considerar o
-  fluxo fechado.
-- Abrir/mesclar PR quando houver permissão no GitHub; o conector atual não
-  permitiu criar issue/PR automaticamente.
+- Revisar com a equipe se as funções 9 e 10 devem entrar em views existentes ou
+  se exigem um novo ponto do fluxo.
+
+## Última validação
+
+- Integração publicada em `origin/main` no commit `fb70bb5`.
+- Chrome headless abriu o app estático localmente e validou o fluxo: busca,
+  comparação, rota, troca modal, salvamento no histórico e indicadores de
+  impacto.
+- Capturas desktop e mobile foram conferidas localmente sem adicionar arquivos
+  temporários ao repositório.

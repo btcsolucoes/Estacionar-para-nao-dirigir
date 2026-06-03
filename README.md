@@ -31,8 +31,13 @@ Uber, shuttle ou ônibus.
 
 - Confirmar o escopo das funcionalidades 9 e 10 com o responsável antes de
   criar telas novas ou alterar o fluxo principal.
-- Validar visualmente no navegador da equipe; esta versão foi mantida como app
-  estático por ausência de Node.js/npm no ambiente atual.
+
+## Validação local
+
+- Chrome headless abriu o app estático e validou o fluxo principal: busca,
+  comparação, rota, troca modal, salvamento no histórico e indicadores de
+  impacto.
+- Capturas desktop e mobile foram conferidas localmente.
 
 ## Como abrir
 
