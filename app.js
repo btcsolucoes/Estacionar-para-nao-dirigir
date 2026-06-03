@@ -60,9 +60,12 @@ const state = {
   reports: saved.reports || reportsSeed,
 };
 
-let map;
-let markers = [];
-let routeLayer;
+const mapBounds = {
+  south: -8.0895,
+  west: -34.8998,
+  north: -8.0535,
+  east: -34.8652,
+};
 
 function readSaved() {
   try {
@@ -153,6 +156,35 @@ function mapsUrl(lot = selectedLot()) {
   return `https://www.google.com/maps/dir/?api=1&origin=${lot.lat},${lot.lng}&destination=${dest.lat},${dest.lng}&travelmode=walking`;
 }
 
+function trafficClass(value) {
+  return value === "alto" ? "high" : value === "médio" ? "medium" : "low";
+}
+
+function mapPoint(point) {
+  const x = ((point.lng - mapBounds.west) / (mapBounds.east - mapBounds.west)) * 100;
+  const y = ((mapBounds.north - point.lat) / (mapBounds.north - mapBounds.south)) * 100;
+  return {
+    x: Math.max(4, Math.min(96, x)),
+    y: Math.max(4, Math.min(96, y)),
+  };
+}
+
+function osmEmbedUrl() {
+  const dest = destination();
+  const bbox = `${mapBounds.west},${mapBounds.south},${mapBounds.east},${mapBounds.north}`;
+  return `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(bbox)}&layer=mapnik&marker=${dest.lat},${dest.lng}`;
+}
+
+function routeLineStyle() {
+  const lot = mapPoint(selectedLot());
+  const dest = mapPoint(destination());
+  const dx = dest.x - lot.x;
+  const dy = dest.y - lot.y;
+  const length = Math.sqrt(dx * dx + dy * dy);
+  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+  return `left:${lot.x}%;top:${lot.y}%;width:${length}%;transform:rotate(${angle}deg);`;
+}
+
 function setTab(tab) {
   state.tab = tab;
   saveState();
@@ -181,12 +213,11 @@ function render() {
         <section class="content">${renderTabContent()}</section>
       </aside>
       <section class="map-area">
-        <div id="real-map" class="real-map"></div>
+        ${renderMap()}
         ${renderMapOverlay()}
       </section>
     </section>
   `;
-  initMap();
 }
 
 function renderHeader() {
@@ -295,7 +326,7 @@ function renderLotCard(lot) {
   return `
     <article class="lot-card ${selected ? "selected" : ""}">
       <button class="lot-main" type="button" data-lot-route="${lot.id}">
-        <div class="pin ${lot.traffic}">P</div>
+        <div class="pin ${trafficClass(lot.traffic)}">P</div>
         <div>
           <h3>${escapeText(lot.name)}</h3>
           <p>${money(lot.price)} · ${walkMinutes(lot)} min ${selectedMode().label.toLowerCase()} · ${lot.available}/${lot.total} vagas</p>
@@ -317,7 +348,7 @@ function renderRoute() {
   return `
     <section class="route-summary">
       <div class="route-head">
-        <span class="pin ${lot.traffic}">P</span>
+        <span class="pin ${trafficClass(lot.traffic)}">P</span>
         <div>
           <h2>${escapeText(lot.name)}</h2>
           <p>Destino: ${escapeText(destination().name)} · ${escapeText(state.time)}</p>
@@ -403,7 +434,7 @@ function renderMapOverlay() {
   const lot = selectedLot();
   return `
     <div class="map-card">
-      <span class="status ${lot.traffic}">${lot.traffic === "alto" ? "Crítico" : lot.traffic === "médio" ? "Atenção" : "Fluido"}</span>
+      <span class="status ${trafficClass(lot.traffic)}">${lot.traffic === "alto" ? "Crítico" : lot.traffic === "médio" ? "Atenção" : "Fluido"}</span>
       <h2>${escapeText(lot.name)}</h2>
       <p>${lot.available} vagas · ${money(lot.price)} · ${totalMinutes(lot)} min total</p>
       <div class="map-actions">
@@ -414,56 +445,26 @@ function renderMapOverlay() {
   `;
 }
 
-function initMap() {
-  const mapEl = document.getElementById("real-map");
-  if (!mapEl || !window.L) {
-    mapEl.innerHTML = `<div class="map-fallback">Mapa real indisponível agora. Use o botão Waze para navegar.</div>`;
-    return;
-  }
-  if (map) map.remove();
-  markers = [];
-  const dest = destination();
-  map = L.map(mapEl, { zoomControl: false }).setView([dest.lat, dest.lng], 14);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
-    attribution: "&copy; OpenStreetMap",
-  }).addTo(map);
-  L.control.zoom({ position: "bottomright" }).addTo(map);
-
-  L.circleMarker([dest.lat, dest.lng], {
-    radius: 9,
-    color: "#111827",
-    fillColor: "#facc15",
-    fillOpacity: 1,
-    weight: 2,
-  }).addTo(map).bindPopup(`Destino: ${dest.name}`);
-
-  lots.forEach((lot) => {
-    const marker = L.marker([lot.lat, lot.lng], { title: lot.name }).addTo(map);
-    marker.bindPopup(`<strong>${lot.name}</strong><br>${money(lot.price)} · ${lot.available} vagas<br><button data-popup-lot="${lot.id}">Escolher</button>`);
-    marker.on("click", () => {
-      state.selectedLotId = lot.id;
-      saveState();
-      drawRoute();
-    });
-    markers.push(marker);
-  });
-  drawRoute();
-  setTimeout(() => map.invalidateSize(), 80);
-}
-
-function drawRoute() {
-  if (!map || !window.L) return;
-  const lot = selectedLot();
-  const dest = destination();
-  if (routeLayer) routeLayer.remove();
-  routeLayer = L.polyline([[lot.lat, lot.lng], [dest.lat, dest.lng]], {
-    color: "#2563eb",
-    weight: 4,
-    opacity: 0.85,
-  }).addTo(map);
-  const bounds = L.latLngBounds([[lot.lat, lot.lng], [dest.lat, dest.lng]]);
-  map.fitBounds(bounds.pad(0.35));
+function renderMap() {
+  const destPoint = mapPoint(destination());
+  return `
+    <iframe
+      class="real-map-frame"
+      title="Mapa real do Recife Antigo"
+      src="${osmEmbedUrl()}"
+      loading="eager"
+      referrerpolicy="no-referrer-when-downgrade"
+    ></iframe>
+    <div class="map-overlay-layer" aria-label="Estacionamentos no mapa">
+      <div class="route-line-real" style="${routeLineStyle()}"></div>
+      <div class="dest-pin" style="left:${destPoint.x}%;top:${destPoint.y}%;">Destino</div>
+      ${lots.map((lot) => {
+        const point = mapPoint(lot);
+        const selected = lot.id === state.selectedLotId ? "selected" : "";
+        return `<button class="map-parking-pin ${trafficClass(lot.traffic)} ${selected}" style="left:${point.x}%;top:${point.y}%;" type="button" data-lot-route="${lot.id}" aria-label="${escapeText(lot.name)}">P</button>`;
+      }).join("")}
+    </div>
+  `;
 }
 
 document.addEventListener("click", (event) => {

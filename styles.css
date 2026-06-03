@@ -25,6 +25,7 @@
 body {
   margin: 0;
   min-height: 100vh;
+  overflow-x: hidden;
   background:
     linear-gradient(130deg, rgba(37, 99, 235, 0.16), transparent 34%),
     linear-gradient(300deg, rgba(21, 154, 104, 0.18), transparent 36%),
@@ -60,7 +61,8 @@ a {
 
 .app-shell {
   width: min(1240px, 100%);
-  min-height: calc(100vh - 36px);
+  height: calc(100vh - 36px);
+  min-height: 720px;
   margin: auto;
   display: grid;
   grid-template-columns: minmax(390px, 470px) minmax(0, 1fr);
@@ -72,7 +74,7 @@ a {
 }
 
 .panel {
-  min-height: 100%;
+  min-height: 0;
   display: grid;
   grid-template-rows: auto auto auto 1fr;
   border-right: 1px solid var(--line);
@@ -386,12 +388,12 @@ a {
   font-weight: 950;
 }
 
-.pin.médio {
+.pin.medium {
   background: var(--yellow);
   color: var(--ink);
 }
 
-.pin.alto {
+.pin.high {
   background: var(--red);
 }
 
@@ -600,23 +602,83 @@ a {
 
 .map-area {
   position: relative;
-  min-height: 720px;
+  min-height: 0;
+  height: 100%;
   background: #dbe8e5;
 }
 
-.real-map {
+.real-map-frame {
   position: absolute;
   inset: 0;
   z-index: 1;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #dbe8e5;
 }
 
-.map-fallback {
-  height: 100%;
+.map-overlay-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.route-line-real {
+  position: absolute;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.9);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+  transform-origin: left center;
+}
+
+.dest-pin,
+.map-parking-pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.dest-pin {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: #facc15;
+  color: #111827;
+  padding: 0 10px;
+  box-shadow: 0 8px 20px rgba(17, 24, 39, 0.2);
+  font-size: 0.72rem;
+  font-weight: 950;
+}
+
+.map-parking-pin {
   display: grid;
+  width: 34px;
+  height: 34px;
   place-items: center;
-  color: var(--muted);
-  padding: 24px;
-  text-align: center;
+  border: 3px solid #fff;
+  border-radius: 999px;
+  background: var(--green);
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(17, 24, 39, 0.25);
+  font-weight: 950;
+  pointer-events: auto;
+}
+
+.map-parking-pin.medium {
+  background: var(--yellow);
+  color: var(--ink);
+}
+
+.map-parking-pin.high {
+  background: var(--red);
+}
+
+.map-parking-pin.selected {
+  outline: 4px solid rgba(37, 99, 235, 0.28);
+  background: var(--blue);
 }
 
 .map-card {
@@ -660,12 +722,12 @@ a {
   font-weight: 950;
 }
 
-.status.médio {
+.status.medium {
   background: var(--yellow);
   color: var(--ink);
 }
 
-.status.alto {
+.status.high {
   background: var(--red);
 }
 
@@ -683,22 +745,13 @@ a {
   font-weight: 950;
 }
 
-.leaflet-popup-content button {
-  min-height: 30px;
-  border: 0;
-  border-radius: 8px;
-  background: var(--blue);
-  color: #fff;
-  padding: 0 10px;
-  font-weight: 800;
-}
-
 @media (max-width: 900px) {
   .app {
     padding: 0;
   }
 
   .app-shell {
+    height: auto;
     min-height: 100vh;
     grid-template-columns: 1fr;
     border: 0;
@@ -712,6 +765,7 @@ a {
 
   .map-area {
     min-height: 420px;
+    height: 420px;
     order: initial;
   }
 
