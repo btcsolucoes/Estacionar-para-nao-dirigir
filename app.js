@@ -1,5 +1,13 @@
 const STORAGE_KEY = "parking-zero-app-v2";
 
+const originPresets = [
+  { name: "Boa Viagem, Recife - PE", lat: -8.1258, lng: -34.9031 },
+  { name: "Casa Forte, Recife - PE", lat: -8.0344, lng: -34.9194 },
+  { name: "Olinda - PE", lat: -8.0101, lng: -34.8552 },
+  { name: "Jaboatão dos Guararapes - PE", lat: -8.112, lng: -35.0154 },
+  { name: "São Paulo - SP", lat: -23.5558, lng: -46.6396 },
+];
+
 const destinations = [
   { id: "marco", name: "Marco Zero", area: "Recife Antigo", lat: -8.0631, lng: -34.8711 },
   { id: "bom-jesus", name: "Rua do Bom Jesus", area: "Recife Antigo", lat: -8.0614, lng: -34.8717 },
@@ -49,6 +57,10 @@ const reportsSeed = [
 const saved = readSaved();
 const state = {
   tab: saved.tab || "search",
+  originText: saved.originText || originPresets[0].name,
+  originLat: saved.originLat || originPresets[0].lat,
+  originLng: saved.originLng || originPresets[0].lng,
+  originStatus: "",
   destinationId: saved.destinationId || "marco",
   time: saved.time || "Hoje, 20:00",
   modeId: saved.modeId || "walk",
@@ -78,6 +90,9 @@ function readSaved() {
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
     tab: state.tab,
+    originText: state.originText,
+    originLat: state.originLat,
+    originLng: state.originLng,
     destinationId: state.destinationId,
     time: state.time,
     modeId: state.modeId,
@@ -101,6 +116,18 @@ function selectedMode() {
   return modes.find((item) => item.id === state.modeId) || modes[0];
 }
 
+function origin() {
+  return {
+    name: state.originText || "Origem",
+    lat: Number(state.originLat),
+    lng: Number(state.originLng),
+  };
+}
+
+function originReady() {
+  return Number.isFinite(Number(state.originLat)) && Number.isFinite(Number(state.originLng));
+}
+
 function money(value) {
   return `R$ ${value.toFixed(2).replace(".", ",")}`;
 }
@@ -115,12 +142,52 @@ function escapeText(value) {
   }[char]));
 }
 
+function normalizeText(value) {
+  return String(value).trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
 function walkMinutes(lot, mode = selectedMode()) {
-  return Math.max(3, Math.round((lot.distance / 75) * mode.pace));
+  return Math.max(3, Math.round((walkDistance(lot) / 75) * mode.pace));
+}
+
+function driveMinutes(lot) {
+  if (!originReady()) return lot.drive;
+  const km = distanceKm(origin(), lot);
+  const traffic = lot.traffic === "alto" ? 9 : lot.traffic === "médio" ? 5 : 2;
+  if (km < 2) return Math.max(6, Math.round(km * 8 + traffic));
+  if (km < 35) return Math.round((km / 24) * 60 + traffic);
+  return Math.round((km / 68) * 60 + traffic);
 }
 
 function totalMinutes(lot, mode = selectedMode()) {
-  return lot.drive + walkMinutes(lot, mode);
+  return driveMinutes(lot) + walkMinutes(lot, mode);
+}
+
+function distanceKm(a, b) {
+  const radius = 6371;
+  const toRad = (value) => value * Math.PI / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const lat1 = toRad(a.lat);
+  const lat2 = toRad(b.lat);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+  return 2 * radius * Math.asin(Math.sqrt(h));
+}
+
+function walkDistance(lot) {
+  return Math.max(180, Math.round(distanceKm(lot, destination()) * 1000 * 1.18));
+}
+
+function formatDistance(km) {
+  if (km < 1) return `${Math.round(km * 1000)} m`;
+  return `${km.toFixed(km < 10 ? 1 : 0).replace(".", ",")} km`;
+}
+
+function formatMinutes(minutes) {
+  if (minutes < 90) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  return rest ? `${hours}h ${rest}min` : `${hours}h`;
 }
 
 function availability(lot) {
@@ -132,7 +199,7 @@ function trafficPenalty(lot) {
 }
 
 function scoreLot(lot) {
-  return Math.round(100 - lot.price * 1.4 - walkMinutes(lot) * 1.8 - trafficPenalty(lot) + availability(lot) * 0.35 + lot.safety * 0.18);
+  return Math.round(100 - lot.price * 1.4 - walkMinutes(lot) * 1.8 - driveMinutes(lot) * 0.18 - trafficPenalty(lot) + availability(lot) * 0.35 + lot.safety * 0.18);
 }
 
 function rankedLots() {
@@ -151,7 +218,12 @@ function wazeUrl(lot = selectedLot()) {
   return `https://waze.com/ul?ll=${lot.lat},${lot.lng}&navigate=yes`;
 }
 
-function mapsUrl(lot = selectedLot()) {
+function mapsDriveUrl(lot = selectedLot()) {
+  const start = originReady() ? `${origin().lat},${origin().lng}` : encodeURIComponent(origin().name);
+  return `https://www.google.com/maps/dir/?api=1&origin=${start}&destination=${lot.lat},${lot.lng}&travelmode=driving`;
+}
+
+function mapsWalkUrl(lot = selectedLot()) {
   const dest = destination();
   return `https://www.google.com/maps/dir/?api=1&origin=${lot.lat},${lot.lng}&destination=${dest.lat},${dest.lng}&travelmode=walking`;
 }
@@ -237,7 +309,19 @@ function renderControls() {
   return `
     <section class="search-card">
       <label>
-        <span>Destino</span>
+        <span>Onde você está?</span>
+        <input list="origin-options" data-field="originText" value="${escapeText(state.originText)}" placeholder="Digite seu endereço, cidade ou país" />
+        <datalist id="origin-options">
+          ${originPresets.map((item) => `<option value="${escapeText(item.name)}"></option>`).join("")}
+        </datalist>
+      </label>
+      <div class="origin-actions">
+        <button type="button" data-action="resolve-origin">Atualizar origem</button>
+        <button type="button" data-action="use-location">Minha localização</button>
+      </div>
+      ${state.originStatus ? `<p class="origin-status">${escapeText(state.originStatus)}</p>` : ""}
+      <label>
+        <span>Destino no Recife Antigo</span>
         <select data-field="destinationId">${selectOptions(destinations, state.destinationId)}</select>
       </label>
       <label>
@@ -288,6 +372,7 @@ function renderSearch() {
       <span>Melhor escolha agora</span>
       <h2>${escapeText(best.name)}</h2>
       <p>${money(best.price)} · ${walkMinutes(best)} min ${selectedMode().label.toLowerCase()} · ${best.available} vagas</p>
+      <small>Saindo de ${escapeText(origin().name)} até ${escapeText(destination().name)}</small>
       <div class="decision-actions">
         <button class="primary" type="button" data-lot-route="${best.id}">Ver rota</button>
         <a class="secondary" href="${wazeUrl(best)}" target="_blank" rel="noreferrer">Abrir Waze</a>
@@ -296,7 +381,7 @@ function renderSearch() {
     <div class="quick-stats">
       <article><strong>${lots.length}</strong><span>opções</span></article>
       <article><strong>${money(Math.min(...lots.map((lot) => lot.price)))}</strong><span>menor preço</span></article>
-      <article><strong>${reportsSeed.length}</strong><span>alertas ativos</span></article>
+      <article><strong>${formatDistance(distanceKm(origin(), best))}</strong><span>até estacionar</span></article>
     </div>
     <div class="section-title">
       <h2>Estacionamentos próximos</h2>
@@ -329,7 +414,8 @@ function renderLotCard(lot) {
         <div class="pin ${trafficClass(lot.traffic)}">P</div>
         <div>
           <h3>${escapeText(lot.name)}</h3>
-          <p>${money(lot.price)} · ${walkMinutes(lot)} min ${selectedMode().label.toLowerCase()} · ${lot.available}/${lot.total} vagas</p>
+          <p>${money(lot.price)} · ${formatMinutes(driveMinutes(lot))} de carro · ${walkMinutes(lot)} min ${selectedMode().label.toLowerCase()}</p>
+          <p>${lot.available}/${lot.total} vagas · ${formatDistance(distanceKm(origin(), lot))} da origem</p>
           <small>${lot.tags.map(escapeText).join(" · ")}</small>
         </div>
         <strong>${scoreLot(lot)}</strong>
@@ -337,6 +423,7 @@ function renderLotCard(lot) {
       <div class="lot-actions">
         <button type="button" data-favorite="${lot.id}">${state.favorites.includes(lot.id) ? "Salvo" : "Salvar"}</button>
         <a href="${wazeUrl(lot)}" target="_blank" rel="noreferrer">Waze</a>
+        <a href="${mapsDriveUrl(lot)}" target="_blank" rel="noreferrer">Maps</a>
       </div>
     </article>
   `;
@@ -351,17 +438,19 @@ function renderRoute() {
         <span class="pin ${trafficClass(lot.traffic)}">P</span>
         <div>
           <h2>${escapeText(lot.name)}</h2>
+          <p>Origem: ${escapeText(origin().name)}</p>
           <p>Destino: ${escapeText(destination().name)} · ${escapeText(state.time)}</p>
         </div>
       </div>
       <div class="route-grid">
-        <article><span>Até estacionar</span><strong>${lot.drive} min</strong><small>trânsito ${lot.traffic}</small></article>
-        <article><span>${mode.label} final</span><strong>${walkMinutes(lot)} min</strong><small>${mode.cost}</small></article>
-        <article><span>Total estimado</span><strong>${totalMinutes(lot)} min</strong><small>${money(lot.price)}</small></article>
+        <article><span>Origem até vaga</span><strong>${formatMinutes(driveMinutes(lot))}</strong><small>${formatDistance(distanceKm(origin(), lot))} · trânsito ${lot.traffic}</small></article>
+        <article><span>${mode.label} final</span><strong>${walkMinutes(lot)} min</strong><small>${Math.round(walkDistance(lot))} m · ${mode.cost}</small></article>
+        <article><span>Total estimado</span><strong>${formatMinutes(totalMinutes(lot))}</strong><small>${money(lot.price)}</small></article>
       </div>
       <div class="decision-actions">
         <a class="primary" href="${wazeUrl(lot)}" target="_blank" rel="noreferrer" data-save-route="${lot.id}">Ir pelo Waze</a>
-        <a class="secondary" href="${mapsUrl(lot)}" target="_blank" rel="noreferrer">Trecho final no Maps</a>
+        <a class="secondary" href="${mapsDriveUrl(lot)}" target="_blank" rel="noreferrer">Origem até vaga</a>
+        <a class="secondary" href="${mapsWalkUrl(lot)}" target="_blank" rel="noreferrer">Vaga até destino</a>
       </div>
       <button class="save-route" type="button" data-save-route="${lot.id}">Salvar rota no histórico</button>
     </section>
@@ -423,7 +512,7 @@ function renderSaved() {
       ${state.history.length ? state.history.map((item) => `
         <article>
           <strong>${escapeText(item.lot)}</strong>
-          <p>${escapeText(item.destination)} · ${item.minutes} min · ${escapeText(item.time)}</p>
+          <p>${escapeText(item.origin || "Origem")} → ${escapeText(item.destination)} · ${formatMinutes(item.minutes)} · ${escapeText(item.time)}</p>
         </article>
       `).join("") : `<p class="empty">Salve uma rota para criar histórico.</p>`}
     </div>
@@ -436,7 +525,8 @@ function renderMapOverlay() {
     <div class="map-card">
       <span class="status ${trafficClass(lot.traffic)}">${lot.traffic === "alto" ? "Crítico" : lot.traffic === "médio" ? "Atenção" : "Fluido"}</span>
       <h2>${escapeText(lot.name)}</h2>
-      <p>${lot.available} vagas · ${money(lot.price)} · ${totalMinutes(lot)} min total</p>
+      <p>${lot.available} vagas · ${money(lot.price)} · ${formatMinutes(totalMinutes(lot))} total</p>
+      <small>${formatDistance(distanceKm(origin(), lot))} da sua origem · ${Math.round(walkDistance(lot))} m até o destino</small>
       <div class="map-actions">
         <button type="button" data-lot-route="${lot.id}">Rota</button>
         <button type="button" data-tab="reports">Relatos</button>
@@ -467,7 +557,91 @@ function renderMap() {
   `;
 }
 
+function applyPresetOrigin() {
+  const typed = normalizeText(state.originText);
+  const preset = originPresets.find((item) => normalizeText(item.name) === typed);
+  if (!preset) return false;
+  state.originText = preset.name;
+  state.originLat = preset.lat;
+  state.originLng = preset.lng;
+  state.originStatus = `Origem definida: ${preset.name}`;
+  return true;
+}
+
+async function resolveOrigin() {
+  const originInput = document.querySelector("[data-field=originText]");
+  if (originInput) state.originText = originInput.value;
+  if (applyPresetOrigin()) {
+    saveState();
+    render();
+    return;
+  }
+  const query = state.originText.trim();
+  if (!query) {
+    state.originStatus = "Digite uma origem primeiro.";
+    render();
+    return;
+  }
+  state.originStatus = "Buscando origem...";
+  render();
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&addressdetails=1&q=${encodeURIComponent(query)}`;
+    const response = await fetch(url);
+    const results = await response.json();
+    if (!results.length) {
+      state.originStatus = "Não encontrei esse endereço. Tente colocar cidade/estado também.";
+      render();
+      return;
+    }
+    state.originLat = Number(results[0].lat);
+    state.originLng = Number(results[0].lon);
+    state.originText = results[0].display_name.split(",").slice(0, 3).join(",");
+    state.originStatus = `Origem definida: ${state.originText}`;
+    saveState();
+    render();
+  } catch (error) {
+    state.originStatus = "Não consegui consultar o endereço agora. Use um preset ou tente de novo.";
+    render();
+  }
+}
+
+function useCurrentLocation() {
+  if (!navigator.geolocation) {
+    state.originStatus = "Seu navegador não liberou localização.";
+    render();
+    return;
+  }
+  state.originStatus = "Pedindo sua localização...";
+  render();
+  navigator.geolocation.getCurrentPosition((position) => {
+    state.originLat = position.coords.latitude;
+    state.originLng = position.coords.longitude;
+    state.originText = "Minha localização atual";
+    state.originStatus = "Origem definida pela sua localização.";
+    saveState();
+    render();
+  }, () => {
+    state.originStatus = "Localização negada. Digite seu endereço manualmente.";
+    render();
+  }, {
+    enableHighAccuracy: true,
+    timeout: 10000,
+  });
+}
+
 document.addEventListener("click", (event) => {
+  const action = event.target.closest("[data-action]");
+  if (action) {
+    if (action.dataset.action === "resolve-origin") {
+      resolveOrigin();
+      return;
+    }
+    if (action.dataset.action === "use-location") {
+      useCurrentLocation();
+      return;
+    }
+  }
+
   const tab = event.target.closest("[data-tab]");
   if (tab) {
     setTab(tab.dataset.tab);
@@ -526,6 +700,7 @@ document.addEventListener("click", (event) => {
       destination: destination().name,
       minutes: totalMinutes(lot),
       time: state.time,
+      origin: origin().name,
     }].concat(state.history).slice(0, 8);
     if (!state.favorites.includes(lot.id)) state.favorites.push(lot.id);
     saveState();
@@ -536,6 +711,10 @@ document.addEventListener("change", (event) => {
   const field = event.target.dataset.field;
   if (!field) return;
   state[field] = event.target.value;
+  if (field === "originText") {
+    state.originStatus = "";
+    applyPresetOrigin();
+  }
   saveState();
   render();
 });

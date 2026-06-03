@@ -140,6 +140,7 @@ a {
 }
 
 .search-card select,
+.search-card input,
 .report-form select,
 .report-form input {
   width: 100%;
@@ -149,6 +150,35 @@ a {
   background: #fff;
   color: var(--ink);
   padding: 0 12px;
+}
+
+.origin-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.origin-actions button {
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--blue);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.origin-status,
+.hero-decision small,
+.map-card small {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.hero-decision small {
+  color: #cde8ff;
 }
 
 .mode-grid {
@@ -712,6 +742,11 @@ a {
   font-size: 0.88rem;
 }
 
+.map-card small {
+  display: block;
+  margin-top: 4px;
+}
+
 .status {
   display: inline-flex;
   border-radius: 999px;
@@ -805,6 +840,10 @@ a {
   }
 
   .report-form {
+    grid-template-columns: 1fr;
+  }
+
+  .origin-actions {
     grid-template-columns: 1fr;
   }
 
