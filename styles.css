@@ -494,6 +494,50 @@ button {
   font-size: 1.8rem;
 }
 
+.impact-grid,
+.history-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.history-summary {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0 0 18px;
+}
+
+.impact-card,
+.summary-card {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.impact-card span,
+.summary-card span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.impact-card strong,
+.summary-card strong {
+  display: block;
+  margin: 6px 0;
+  color: var(--strong);
+  font-size: 1.3rem;
+}
+
+.impact-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
 .mode-alternatives {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -763,6 +807,8 @@ button {
   .mode-grid,
   .parking-meta,
   .detail-grid,
+  .impact-grid,
+  .history-summary,
   .mode-alternatives,
   .mini-grid,
   .sidebar-metrics {

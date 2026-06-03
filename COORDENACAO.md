@@ -47,6 +47,14 @@ editado em tempo real por mais de uma pessoa/agente.
 - Função 4: integrada em `alternatives`.
 - Função 5: integrada em `traffic`.
 - Função 6: integrada em `route`.
-- Funções 7 e 8: devem se integrar principalmente a `history` ou contexto
-  lateral.
+- Funções 7 e 8: integradas em `history` e no contexto lateral, com resumo de
+  uso, tempo evitado, modal mais usado e indicadores de impacto.
 - Funções 9 e 10: confirmar escopo antes de criar novas views.
+
+## O que ainda falta
+
+- Receber ou confirmar o escopo das funções 9 e 10 com Vinicius.
+- Fazer validação visual final em navegador assim que a equipe considerar o
+  fluxo fechado.
+- Abrir/mesclar PR quando houver permissão no GitHub; o conector atual não
+  permitiu criar issue/PR automaticamente.

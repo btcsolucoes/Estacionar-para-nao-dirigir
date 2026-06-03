@@ -22,7 +22,17 @@ Uber, shuttle ou ônibus.
 - Resumo da rota em etapas com tempo total estimado.
 - Alternativas de mobilidade após estacionar, com recomendação de troca modal.
 - Mapa de trânsito simulado com áreas críticas e baixa disponibilidade.
-- Histórico local de rotas salvas.
+- Histórico local de rotas salvas, com resumo de uso, tempo evitado e modal
+  mais usado.
+- Indicadores de impacto no contexto lateral para reforçar a redução de
+  circulação de carro na área crítica.
+
+## Pendências de integração
+
+- Confirmar o escopo das funcionalidades 9 e 10 com o responsável antes de
+  criar telas novas ou alterar o fluxo principal.
+- Validar visualmente no navegador da equipe; esta versão foi mantida como app
+  estático por ausência de Node.js/npm no ambiente atual.
 
 ## Como abrir
 

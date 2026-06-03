@@ -196,6 +196,38 @@ function getRecommendedMode(parking = getSelectedParking()) {
   return modeOptions.find((mode) => mode.id === "bike");
 }
 
+function getRouteImpact(parking = getSelectedParking(), mode = getSelectedMode()) {
+  const circulationRisk = parking.traffic === "high" ? 18 : parking.traffic === "medium" ? 12 : 8;
+  const savedMinutes = Math.max(6, Math.round(circulationRisk + parking.occupancy / 12 - mode.minutes / 3));
+  const avoidedKm = Math.max(1.1, Number((parking.distanceMeters / 1000 + parking.occupancy / 100).toFixed(1)));
+
+  return {
+    savedMinutes,
+    avoidedKm,
+  };
+}
+
+function getHistorySummary() {
+  const totalRoutes = state.history.length;
+  const savedMinutes = state.history.reduce((sum, item) => sum + (item.savedMinutes || 0), 0);
+  const averageScore = totalRoutes
+    ? Math.round(state.history.reduce((sum, item) => sum + item.score, 0) / totalRoutes)
+    : 0;
+  const modeCounts = state.history.reduce((counts, item) => {
+    counts[item.modeLabel] = (counts[item.modeLabel] || 0) + 1;
+    return counts;
+  }, {});
+  const topModeEntry = Object.entries(modeCounts).sort((a, b) => b[1] - a[1])[0];
+  const topMode = topModeEntry ? topModeEntry[0] : "Sem dados";
+
+  return {
+    totalRoutes,
+    savedMinutes,
+    averageScore,
+    topMode,
+  };
+}
+
 function statusPill(traffic) {
   const status = trafficLabels[traffic];
   return `<span class="status-pill ${status.className}">${status.label}</span>`;
@@ -375,6 +407,7 @@ function renderRoute() {
   const parking = getSelectedParking();
   const mode = getSelectedMode();
   const totalMinutes = getTotalRouteMinutes(parking, mode);
+  const impact = getRouteImpact(parking, mode);
 
   mainView.innerHTML = `
     <section class="section">
@@ -420,6 +453,19 @@ function renderRoute() {
           <p>${parking.driveMinutes} min de carro + ${mode.minutes} min no trecho final.</p>
         </div>
         <strong>${totalMinutes} min</strong>
+      </div>
+
+      <div class="impact-grid" aria-label="Impacto estimado da escolha">
+        <div class="impact-card">
+          <span>Tempo evitado</span>
+          <strong>${impact.savedMinutes} min</strong>
+          <p>Estimativa de circulação que deixa de acontecer na área crítica.</p>
+        </div>
+        <div class="impact-card">
+          <span>Carro fora do miolo</span>
+          <strong>${impact.avoidedKm} km</strong>
+          <p>Trecho que deixa de ser disputado por vaga no Recife Antigo.</p>
+        </div>
       </div>
     </section>
   `;
@@ -533,12 +579,34 @@ function renderTraffic() {
 }
 
 function renderHistory() {
+  const summary = getHistorySummary();
+
   mainView.innerHTML = `
     <section class="section">
       <div class="section-header">
         <div>
           <h3>Histórico</h3>
           <p>Rotas e estacionamentos usados ficam salvos neste navegador.</p>
+        </div>
+        ${state.history.length > 0 ? `<button class="secondary-button" type="button" data-clear-history="true">Limpar histórico</button>` : ""}
+      </div>
+
+      <div class="history-summary" aria-label="Resumo do histórico">
+        <div class="summary-card">
+          <span>Rotas salvas</span>
+          <strong>${summary.totalRoutes}</strong>
+        </div>
+        <div class="summary-card">
+          <span>Tempo evitado</span>
+          <strong>${summary.savedMinutes} min</strong>
+        </div>
+        <div class="summary-card">
+          <span>Modal mais usado</span>
+          <strong>${summary.topMode}</strong>
+        </div>
+        <div class="summary-card">
+          <span>Score médio</span>
+          <strong>${summary.averageScore || "-"}</strong>
         </div>
       </div>
 
@@ -550,7 +618,7 @@ function renderHistory() {
             <article class="history-item">
               <div>
                 <h4>${item.parkingName}</h4>
-                <p>${item.destination} · ${item.modeLabel} · ${item.totalMinutes ? `${item.totalMinutes} min` : "tempo não registrado"} · ${item.savedAt}</p>
+                <p>${item.destination} · ${item.modeLabel} · ${item.totalMinutes ? `${item.totalMinutes} min` : "tempo não registrado"} · ${item.savedMinutes || 0} min evitados · ${item.savedAt}</p>
               </div>
               <strong>${item.score} pts</strong>
             </article>
@@ -565,12 +633,22 @@ function renderHistory() {
       <h3>Uso acadêmico</h3>
       <p>O histórico ajuda a demonstrar recorrência de escolhas, economia de tempo e padrão de mobilidade urbana.</p>
     </section>
+    <section class="context-section">
+      <h3>Leitura acumulada</h3>
+      <div class="detail-grid">
+        <div class="detail-item"><span>Rotas analisadas</span><strong>${summary.totalRoutes}</strong></div>
+        <div class="detail-item"><span>Tempo evitado</span><strong>${summary.savedMinutes} min</strong></div>
+        <div class="detail-item"><span>Modal dominante</span><strong>${summary.topMode}</strong></div>
+        <div class="detail-item"><span>Score médio</span><strong>${summary.averageScore || "-"}</strong></div>
+      </div>
+    </section>
   `;
 }
 
 function renderRecommendationContext() {
   const parking = getSelectedParking();
   const mode = getSelectedMode();
+  const impact = getRouteImpact(parking, mode);
 
   contextView.innerHTML = `
     <section class="context-section">
@@ -592,6 +670,7 @@ function renderRecommendationContext() {
           <div class="detail-item"><span>Depois de estacionar</span><strong>${mode.label}</strong></div>
           <div class="detail-item"><span>Custo final</span><strong>${mode.cost}</strong></div>
           <div class="detail-item"><span>Tempo total</span><strong>${getTotalRouteMinutes(parking, mode)} min</strong></div>
+          <div class="detail-item"><span>Tempo evitado</span><strong>${impact.savedMinutes} min</strong></div>
         </div>
       </div>
     </section>
@@ -606,13 +685,17 @@ function renderRecommendationContext() {
 function saveHistory() {
   const parking = getSelectedParking();
   const mode = getSelectedMode();
+  const impact = getRouteImpact(parking, mode);
   const now = new Date();
   const entry = {
     id: `${parking.id}-${now.getTime()}`,
     parkingName: parking.name,
     destination: state.destination,
+    arrivalTime: state.arrivalTime,
     modeLabel: mode.label,
     totalMinutes: getTotalRouteMinutes(parking, mode),
+    savedMinutes: impact.savedMinutes,
+    avoidedKm: impact.avoidedKm,
     score: calculateScore(parking),
     savedAt: now.toLocaleString("pt-BR", {
       day: "2-digit",
@@ -625,6 +708,12 @@ function saveHistory() {
   state.history = [entry, ...state.history].slice(0, 6);
   localStorage.setItem("parkingZeroHistory", JSON.stringify(state.history));
   state.view = "history";
+  render();
+}
+
+function clearHistory() {
+  state.history = [];
+  localStorage.removeItem("parkingZeroHistory");
   render();
 }
 
@@ -651,6 +740,7 @@ document.addEventListener("click", (event) => {
   const sort = event.target.closest("[data-sort]");
   const parking = event.target.closest("[data-select-parking]");
   const save = event.target.closest("[data-save-history]");
+  const clear = event.target.closest("[data-clear-history]");
 
   if (nav) {
     state.view = nav.dataset.view;
@@ -683,6 +773,10 @@ document.addEventListener("click", (event) => {
 
   if (save) {
     saveHistory();
+  }
+
+  if (clear) {
+    clearHistory();
   }
 });
 
