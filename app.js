@@ -1,16 +1,16 @@
 const destinations = [
-  { id: "marco-zero", name: "Marco Zero", area: "Praça Rio Branco", load: 5, anchor: 5 },
-  { id: "paco-frevo", name: "Paço do Frevo", area: "Rua da Guia", load: 4, anchor: 4 },
-  { id: "rua-moeda", name: "Rua da Moeda", area: "Polo noturno", load: 5, anchor: 6 },
-  { id: "cais-sertao", name: "Cais do Sertão", area: "Armazéns do Porto", load: 3, anchor: 7 },
-  { id: "arsenal", name: "Praça do Arsenal", area: "Bairro do Recife", load: 4, anchor: 3 },
-  { id: "porto-digital", name: "Porto Digital", area: "Rua do Apolo", load: 3, anchor: 2 },
-  { id: "teatro-apolo", name: "Teatro Apolo", area: "Rua do Recife", load: 4, anchor: 4 },
-  { id: "embaixada", name: "Embaixada dos Bonecos", area: "Rua do Bom Jesus", load: 4, anchor: 5 },
-  { id: "terminal", name: "Terminal Marítimo", area: "Porto do Recife", load: 2, anchor: 8 },
-  { id: "alfandega", name: "Shopping Paço Alfândega", area: "Madre de Deus", load: 3, anchor: 5 },
-  { id: "bom-jesus", name: "Rua do Bom Jesus", area: "Polo gastronômico", load: 5, anchor: 5 },
-  { id: "armazem", name: "Armazém 14", area: "Porto", load: 3, anchor: 8 },
+  { id: "marco-zero", name: "Marco Zero", area: "Praça Rio Branco", load: 5, anchor: 5, lat: -8.0631, lng: -34.8711 },
+  { id: "paco-frevo", name: "Paço do Frevo", area: "Rua da Guia", load: 4, anchor: 4, lat: -8.0618, lng: -34.8718 },
+  { id: "rua-moeda", name: "Rua da Moeda", area: "Polo noturno", load: 5, anchor: 6, lat: -8.0647, lng: -34.8723 },
+  { id: "cais-sertao", name: "Cais do Sertão", area: "Armazéns do Porto", load: 3, anchor: 7, lat: -8.0609, lng: -34.8703 },
+  { id: "arsenal", name: "Praça do Arsenal", area: "Bairro do Recife", load: 4, anchor: 3, lat: -8.0619, lng: -34.8708 },
+  { id: "porto-digital", name: "Porto Digital", area: "Rua do Apolo", load: 3, anchor: 2, lat: -8.0602, lng: -34.8727 },
+  { id: "teatro-apolo", name: "Teatro Apolo", area: "Rua do Recife", load: 4, anchor: 4, lat: -8.0628, lng: -34.8732 },
+  { id: "embaixada", name: "Embaixada dos Bonecos", area: "Rua do Bom Jesus", load: 4, anchor: 5, lat: -8.0612, lng: -34.8714 },
+  { id: "terminal", name: "Terminal Marítimo", area: "Porto do Recife", load: 2, anchor: 8, lat: -8.058, lng: -34.8697 },
+  { id: "alfandega", name: "Shopping Paço Alfândega", area: "Madre de Deus", load: 3, anchor: 5, lat: -8.0644, lng: -34.872 },
+  { id: "bom-jesus", name: "Rua do Bom Jesus", area: "Polo gastronômico", load: 5, anchor: 5, lat: -8.0612, lng: -34.8713 },
+  { id: "armazem", name: "Armazém 14", area: "Porto", load: 3, anchor: 8, lat: -8.0583, lng: -34.8697 },
 ];
 
 const timeSlots = [
@@ -39,15 +39,28 @@ const modes = [
 ];
 
 const parkingLots = [
-  { id: "paco", name: "Estac. Paço Alfândega", address: "Rua Madre de Deus", zone: "Centro", hourly: 18, event: 45, daily: 72, baseAvailability: 70, baseDrive: 10, baseWalk: 4, driveKm: 4.2, anchor: 5, traffic: "médio", note: "mais perto dos polos históricos" },
-  { id: "alfredo", name: "Garagem Alfredo Lisboa", address: "Av. Alfredo Lisboa", zone: "Porto", hourly: 20, event: 52, daily: 86, baseAvailability: 42, baseDrive: 13, baseWalk: 7, driveKm: 4.9, anchor: 6, traffic: "alto", note: "perto, mas sofre em eventos" },
-  { id: "apolo", name: "Garagem Cais do Apolo", address: "Cais do Apolo, 222", zone: "Apolo", hourly: 15, event: 38, daily: 65, baseAvailability: 66, baseDrive: 12, baseWalk: 8, driveKm: 4.6, anchor: 2, traffic: "médio", note: "equilíbrio entre preço e acesso" },
-  { id: "riomar", name: "Estac. RioMar Recife", address: "Av. República do Líbano", zone: "Fora do miolo", hourly: 12, event: 35, daily: 58, baseAvailability: 84, baseDrive: 18, baseWalk: 15, driveKm: 6.8, anchor: 0, traffic: "baixo", note: "bom para deixar o carro fora do centro" },
-  { id: "santo", name: "Ed. Garagem Santo Antônio", address: "Rua do Carmo", zone: "Santo Antônio", hourly: 10, event: 32, daily: 48, baseAvailability: 74, baseDrive: 16, baseWalk: 12, driveKm: 5.1, anchor: 1, traffic: "baixo", note: "barato, com trecho final maior" },
-  { id: "portuaria", name: "Zona Portuária", address: "Cais do Porto", zone: "Borda norte", hourly: 14, event: 36, daily: 60, baseAvailability: 78, baseDrive: 15, baseWalk: 10, driveKm: 5.7, anchor: 8, traffic: "baixo", note: "boa para Cais e Terminal" },
-  { id: "bomjesus", name: "Pátio Bom Jesus", address: "Rua do Bom Jesus", zone: "Histórico", hourly: 22, event: 58, daily: 92, baseAvailability: 35, baseDrive: 15, baseWalk: 5, driveKm: 4.5, anchor: 5, traffic: "alto", note: "conveniente, caro e disputado" },
-  { id: "capibaribe", name: "Bolso Capibaribe", address: "Rua da Aurora", zone: "Borda oeste", hourly: 9, event: 28, daily: 44, baseAvailability: 80, baseDrive: 17, baseWalk: 13, driveKm: 5.9, anchor: 2, traffic: "baixo", note: "menor preço para quem aceita caminhar" },
-  { id: "terminal", name: "Terminal Marítimo", address: "Av. Alfredo Lisboa", zone: "Terminal", hourly: 16, event: 42, daily: 70, baseAvailability: 62, baseDrive: 14, baseWalk: 9, driveKm: 4.8, anchor: 8, traffic: "médio", note: "funciona bem perto dos armazéns" },
+  { id: "paco", name: "Estac. Paço Alfândega", address: "Rua Madre de Deus", zone: "Centro", hourly: 18, event: 45, daily: 72, baseAvailability: 70, baseDrive: 10, baseWalk: 4, driveKm: 4.2, anchor: 5, traffic: "médio", note: "mais perto dos polos históricos", lat: -8.0644, lng: -34.872 },
+  { id: "alfredo", name: "Garagem Alfredo Lisboa", address: "Av. Alfredo Lisboa", zone: "Porto", hourly: 20, event: 52, daily: 86, baseAvailability: 42, baseDrive: 13, baseWalk: 7, driveKm: 4.9, anchor: 6, traffic: "alto", note: "perto, mas sofre em eventos", lat: -8.061, lng: -34.8697 },
+  { id: "apolo", name: "Garagem Cais do Apolo", address: "Cais do Apolo, 222", zone: "Apolo", hourly: 15, event: 38, daily: 65, baseAvailability: 66, baseDrive: 12, baseWalk: 8, driveKm: 4.6, anchor: 2, traffic: "médio", note: "equilíbrio entre preço e acesso", lat: -8.0588, lng: -34.873 },
+  { id: "riomar", name: "Estac. RioMar Recife", address: "Av. República do Líbano", zone: "Fora do miolo", hourly: 12, event: 35, daily: 58, baseAvailability: 84, baseDrive: 18, baseWalk: 15, driveKm: 6.8, anchor: 0, traffic: "baixo", note: "bom para deixar o carro fora do centro", lat: -8.0859, lng: -34.8915 },
+  { id: "santo", name: "Ed. Garagem Santo Antônio", address: "Rua do Carmo", zone: "Santo Antônio", hourly: 10, event: 32, daily: 48, baseAvailability: 74, baseDrive: 16, baseWalk: 12, driveKm: 5.1, anchor: 1, traffic: "baixo", note: "barato, com trecho final maior", lat: -8.0669, lng: -34.8783 },
+  { id: "portuaria", name: "Zona Portuária", address: "Cais do Porto", zone: "Borda norte", hourly: 14, event: 36, daily: 60, baseAvailability: 78, baseDrive: 15, baseWalk: 10, driveKm: 5.7, anchor: 8, traffic: "baixo", note: "boa para Cais e Terminal", lat: -8.058, lng: -34.8688 },
+  { id: "bomjesus", name: "Pátio Bom Jesus", address: "Rua do Bom Jesus", zone: "Histórico", hourly: 22, event: 58, daily: 92, baseAvailability: 35, baseDrive: 15, baseWalk: 5, driveKm: 4.5, anchor: 5, traffic: "alto", note: "conveniente, caro e disputado", lat: -8.0612, lng: -34.8713 },
+  { id: "capibaribe", name: "Bolso Capibaribe", address: "Rua da Aurora", zone: "Borda oeste", hourly: 9, event: 28, daily: 44, baseAvailability: 80, baseDrive: 17, baseWalk: 13, driveKm: 5.9, anchor: 2, traffic: "baixo", note: "menor preço para quem aceita caminhar", lat: -8.0605, lng: -34.8767 },
+  { id: "terminal", name: "Terminal Marítimo", address: "Av. Alfredo Lisboa", zone: "Terminal", hourly: 16, event: 42, daily: 70, baseAvailability: 62, baseDrive: 14, baseWalk: 9, driveKm: 4.8, anchor: 8, traffic: "médio", note: "funciona bem perto dos armazéns", lat: -8.0577, lng: -34.8698 },
+];
+
+const featureStatuses = [
+  { id: 1, title: "Buscar estacionamentos", status: "ok", detail: "destino, horário e perfil recalculam opções" },
+  { id: 2, title: "Comparar opções", status: "ok", detail: "preço, distância, caminhada, vagas, trânsito e score" },
+  { id: 3, title: "Mapa e navegação real", status: "ok", detail: "OpenStreetMap com atalhos Waze e Google Maps" },
+  { id: 4, title: "Sugerir troca modal", status: "ok", detail: "a pé, bike, Uber, shuttle e ônibus" },
+  { id: 5, title: "Exibir áreas críticas", status: "ok", detail: "camadas e alertas no mapa real" },
+  { id: 6, title: "Estimar tempo da rota", status: "ok", detail: "tempo local + abertura no Waze para trânsito real" },
+  { id: 7, title: "Receber relatos", status: "ok", detail: "formulário e lista persistente no navegador" },
+  { id: 8, title: "Recomendar regiões estratégicas", status: "ok", detail: "bolsões e estacionamentos recomendados" },
+  { id: 9, title: "Salvar histórico", status: "ok", detail: "favoritos e histórico no localStorage" },
+  { id: 10, title: "Funcionalidade 10", status: "pending", detail: "não foi enviada/definida nos prints" },
 ];
 
 const defaultReports = [
@@ -127,6 +140,14 @@ function escapeHtml(value) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+function wazeUrl(point) {
+  return "https://www.waze.com/ul?ll=" + point.lat + "%2C" + point.lng + "&navigate=yes&zoom=17";
+}
+
+function googleRouteUrl(point) {
+  return "https://www.google.com/maps/dir/?api=1&destination=" + point.lat + "," + point.lng + "&travelmode=driving";
 }
 
 function currentScenario() {
@@ -236,6 +257,7 @@ function render() {
   else if (state.view === "map") renderMap();
   else if (state.view === "saved") renderSaved();
   else renderOverview();
+  hydrateMap();
 }
 
 function renderOverview() {
@@ -264,6 +286,7 @@ function renderOverview() {
             <button class="primary-button" type="button" data-select="${lot.id}" data-go="route">Usar esta rota</button>
             <button class="secondary-button" type="button" data-go="compare">Comparar preços</button>
             <button class="secondary-button" type="button" data-favorite="${lot.id}">${isFavorite(lot.id) ? "Remover favorito" : "Salvar favorito"}</button>
+            <a class="route-link waze-link" href="${wazeUrl(lot)}" target="_blank" rel="noopener">Abrir no Waze</a>
           </div>
         </section>
 
@@ -278,13 +301,25 @@ function renderOverview() {
             ${sortedLots().slice(0, 4).map(compactLot).join("")}
           </div>
         </section>
+
+        <section class="panel color-panel">
+          <div class="panel-header">
+            <div>
+              <h3>Funcionalidades 1 a 10</h3>
+              <p>Status real com base nas funcionalidades enviadas.</p>
+            </div>
+          </div>
+          <div class="feature-grid">
+            ${featureStatuses.map(featureCard).join("")}
+          </div>
+        </section>
       </div>
 
       <section class="panel">
         <div class="panel-header">
           <div>
-            <h3>Mapa operacional</h3>
-            <p>Verde: estacionar. Amarelo/vermelho: evitar circular.</p>
+            <h3>Mapa real</h3>
+            <p>OpenStreetMap com estacionamentos, destino, áreas críticas e atalhos de rota.</p>
           </div>
         </div>
         ${mapMarkup()}
@@ -317,6 +352,8 @@ function compactLot(lot) {
       <div class="actions">
         <button class="primary-button" type="button" data-select="${lot.id}" data-go="route">Escolher</button>
         <button class="secondary-button" type="button" data-favorite="${lot.id}">${isFavorite(lot.id) ? "Salvo" : "Salvar"}</button>
+        <a class="route-link waze-link" href="${wazeUrl(lot)}" target="_blank" rel="noopener">Waze</a>
+        <a class="route-link maps-link" href="${googleRouteUrl(lot)}" target="_blank" rel="noopener">Google Maps</a>
       </div>
     </article>
   `;
@@ -377,6 +414,8 @@ function renderRoute() {
         <div class="actions">
           <button class="primary-button" type="button" data-save-route="${lot.id}">Salvar rota</button>
           <button class="secondary-button" type="button" data-go="map">Ver relatos</button>
+          <a class="route-link waze-link" href="${wazeUrl(lot)}" target="_blank" rel="noopener">Abrir estacionamento no Waze</a>
+          <a class="route-link maps-link" href="${googleRouteUrl(lot)}" target="_blank" rel="noopener">Abrir no Google Maps</a>
         </div>
       </section>
 
@@ -415,8 +454,8 @@ function renderMap() {
       <section class="panel">
         <div class="panel-header">
           <div>
-            <h2>Mapa e regiões</h2>
-            <p>Use como referência para evitar áreas críticas e escolher bolsões menos congestionados.</p>
+            <h2>Mapa real, trânsito e regiões</h2>
+            <p>OpenStreetMap mostra os pontos. Waze/Google Maps abrem a rota com dados reais do serviço externo.</p>
           </div>
         </div>
         ${mapMarkup()}
@@ -461,17 +500,64 @@ function renderMap() {
 
 function mapMarkup() {
   return `
-    <div class="map-preview">
-      <div class="road road-a"></div>
-      <div class="road road-b"></div>
-      <div class="road road-c"></div>
-      <div class="map-pin bad" style="left:58%;top:25%">Bom Jesus</div>
-      <div class="map-pin warn" style="left:47%;top:52%">Rua da Moeda</div>
-      <div class="map-pin good" style="left:23%;top:65%">Santo Antônio</div>
-      <div class="map-pin good" style="left:72%;top:68%">Zona Portuária</div>
-      <div class="map-pin good" style="left:18%;top:25%">Capibaribe</div>
+    <div class="map-tools">
+      <span class="badge good">Estacionamentos</span>
+      <span class="badge blue">Destino</span>
+      <span class="badge warn">Atenção</span>
+      <span class="badge bad">Evitar</span>
     </div>
+    <div class="real-map" id="real-map"></div>
+    <p class="map-note">O mapa usa OpenStreetMap. Para tempo/trânsito ao vivo, abra a rota no Waze.</p>
   `;
+}
+
+function hydrateMap() {
+  const node = document.getElementById("real-map");
+  if (!node || typeof L === "undefined") return;
+  if (window.parkingZeroMap) {
+    window.parkingZeroMap.remove();
+    window.parkingZeroMap = null;
+  }
+
+  const scenario = currentScenario();
+  const lot = selectedLot();
+  const map = L.map(node, { scrollWheelZoom: false }).setView([-8.063, -34.872], 14);
+  window.parkingZeroMap = map;
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: "&copy; OpenStreetMap",
+  }).addTo(map);
+
+  const criticalStyle = { color: "#ef4444", fillColor: "#ef4444", fillOpacity: 0.18, weight: 2 };
+  const warnStyle = { color: "#f59e0b", fillColor: "#f59e0b", fillOpacity: 0.18, weight: 2 };
+  L.circle([-8.0612, -34.8713], Object.assign({ radius: 130 }, criticalStyle)).addTo(map).bindPopup("Evitar: Rua do Bom Jesus");
+  L.circle([-8.0647, -34.8723], Object.assign({ radius: 115 }, warnStyle)).addTo(map).bindPopup("Atenção: Rua da Moeda");
+
+  sortedLots().forEach(function (item) {
+    const marker = L.circleMarker([item.lat, item.lng], {
+      radius: item.id === lot.id ? 10 : 7,
+      color: item.id === lot.id ? "#0f172a" : "#16a34a",
+      fillColor: item.availability >= 60 ? "#22c55e" : item.availability >= 35 ? "#f59e0b" : "#ef4444",
+      fillOpacity: 0.88,
+      weight: 2,
+    }).addTo(map);
+    marker.bindPopup(
+      `<strong>${item.name}</strong><br>${money(item.eventPrice)} pacote<br>${item.availability}% vagas<br><a href="${wazeUrl(item)}" target="_blank" rel="noopener">Abrir no Waze</a>`,
+    );
+  });
+
+  L.marker([scenario.destination.lat, scenario.destination.lng]).addTo(map).bindPopup("Destino: " + scenario.destination.name);
+  L.polyline([[lot.lat, lot.lng], [scenario.destination.lat, scenario.destination.lng]], {
+    color: "#2563eb",
+    weight: 4,
+    opacity: 0.75,
+    dashArray: "8 8",
+  }).addTo(map);
+  map.fitBounds([[lot.lat, lot.lng], [scenario.destination.lat, scenario.destination.lng]], { padding: [42, 42], maxZoom: 16 });
+  setTimeout(function () {
+    map.invalidateSize();
+  }, 80);
 }
 
 function infoRow(title, detail) {
@@ -498,8 +584,25 @@ function renderSaved() {
           }).join("") : `<div class="empty-state">Escolha uma rota para iniciar o histórico.</div>`}
         </div>
       </section>
+      <section class="panel color-panel">
+        <div class="panel-header"><div><h2>Funcionalidades 1 a 10</h2><p>A 10 ainda depende da sua explicação.</p></div></div>
+        <div class="feature-grid">${featureStatuses.map(featureCard).join("")}</div>
+      </section>
     </div>
   `;
+}
+
+function featureCard(feature) {
+  const label = feature.status === "ok" ? "Funcionando" : "Pendente";
+  const color = feature.status === "ok" ? "good" : "warn";
+  return `<article class="feature-card">
+    <span class="feature-number">${feature.id}</span>
+    <div>
+      <h3>${feature.title}</h3>
+      <p>${feature.detail}</p>
+    </div>
+    <span class="badge ${color}">${label}</span>
+  </article>`;
 }
 
 function isFavorite(id) {
