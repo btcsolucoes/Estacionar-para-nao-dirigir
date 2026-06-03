@@ -61,6 +61,10 @@ const state = {
   originLat: saved.originLat || originPresets[0].lat,
   originLng: saved.originLng || originPresets[0].lng,
   originStatus: "",
+  destinationText: saved.destinationText || destinations[0].name,
+  destinationLat: saved.destinationLat || destinations[0].lat,
+  destinationLng: saved.destinationLng || destinations[0].lng,
+  destinationStatus: "",
   destinationId: saved.destinationId || "marco",
   time: saved.time || "Hoje, 20:00",
   modeId: saved.modeId || "walk",
@@ -93,6 +97,9 @@ function saveState() {
     originText: state.originText,
     originLat: state.originLat,
     originLng: state.originLng,
+    destinationText: state.destinationText,
+    destinationLat: state.destinationLat,
+    destinationLng: state.destinationLng,
     destinationId: state.destinationId,
     time: state.time,
     modeId: state.modeId,
@@ -105,7 +112,11 @@ function saveState() {
 }
 
 function destination() {
-  return destinations.find((item) => item.id === state.destinationId) || destinations[0];
+  return {
+    name: state.destinationText || destinations[0].name,
+    lat: Number(state.destinationLat),
+    lng: Number(state.destinationLng),
+  };
 }
 
 function selectedLot() {
@@ -126,6 +137,10 @@ function origin() {
 
 function originReady() {
   return Number.isFinite(Number(state.originLat)) && Number.isFinite(Number(state.originLng));
+}
+
+function destinationReady() {
+  return Number.isFinite(Number(state.destinationLat)) && Number.isFinite(Number(state.destinationLng));
 }
 
 function money(value) {
@@ -175,6 +190,7 @@ function distanceKm(a, b) {
 }
 
 function walkDistance(lot) {
+  if (!destinationReady()) return lot.distance;
   return Math.max(180, Math.round(distanceKm(lot, destination()) * 1000 * 1.18));
 }
 
@@ -242,7 +258,7 @@ function mapPoint(point) {
 }
 
 function osmEmbedUrl() {
-  const dest = destination();
+  const dest = destinationReady() ? destination() : destinations[0];
   const bbox = `${mapBounds.west},${mapBounds.south},${mapBounds.east},${mapBounds.north}`;
   return `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(bbox)}&layer=mapnik&marker=${dest.lat},${dest.lng}`;
 }
@@ -321,9 +337,17 @@ function renderControls() {
       </div>
       ${state.originStatus ? `<p class="origin-status">${escapeText(state.originStatus)}</p>` : ""}
       <label>
-        <span>Destino no Recife Antigo</span>
-        <select data-field="destinationId">${selectOptions(destinations, state.destinationId)}</select>
+        <span>Para onde você vai no Recife Antigo?</span>
+        <input list="destination-options" data-field="destinationText" value="${escapeText(state.destinationText)}" placeholder="Ex.: Rua da Moeda, Marco Zero, Paço do Frevo" />
+        <datalist id="destination-options">
+          ${destinations.map((item) => `<option value="${escapeText(item.name)}"></option>`).join("")}
+        </datalist>
       </label>
+      <div class="origin-actions">
+        <button type="button" data-action="resolve-destination">Atualizar destino</button>
+        <button type="button" data-action="reset-destination">Marco Zero</button>
+      </div>
+      ${state.destinationStatus ? `<p class="origin-status">${escapeText(state.destinationStatus)}</p>` : ""}
       <label>
         <span>Horário</span>
         <select data-field="time">${selectOptions(times, state.time)}</select>
@@ -568,6 +592,18 @@ function applyPresetOrigin() {
   return true;
 }
 
+function applyPresetDestination() {
+  const typed = normalizeText(state.destinationText);
+  const preset = destinations.find((item) => normalizeText(item.name) === typed);
+  if (!preset) return false;
+  state.destinationId = preset.id;
+  state.destinationText = preset.name;
+  state.destinationLat = preset.lat;
+  state.destinationLng = preset.lng;
+  state.destinationStatus = `Destino definido: ${preset.name}`;
+  return true;
+}
+
 async function resolveOrigin() {
   const originInput = document.querySelector("[data-field=originText]");
   if (originInput) state.originText = originInput.value;
@@ -605,6 +641,56 @@ async function resolveOrigin() {
   }
 }
 
+async function resolveDestination() {
+  const destinationInput = document.querySelector("[data-field=destinationText]");
+  if (destinationInput) state.destinationText = destinationInput.value;
+  if (applyPresetDestination()) {
+    saveState();
+    render();
+    return;
+  }
+  const query = state.destinationText.trim();
+  if (!query) {
+    state.destinationStatus = "Digite para onde você vai.";
+    render();
+    return;
+  }
+  state.destinationStatus = "Buscando destino no Recife Antigo...";
+  render();
+  try {
+    const shouldBiasRecife = !/(recife|pernambuco|\bpe\b|brasil|brazil)/i.test(query);
+    const queryText = shouldBiasRecife ? `${query}, Recife Antigo, Recife, PE, Brasil` : query;
+    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&addressdetails=1&q=${encodeURIComponent(queryText)}`;
+    const response = await fetch(url);
+    const results = await response.json();
+    if (!results.length) {
+      state.destinationStatus = "Não encontrei esse destino. Tente rua, ponto turístico ou bairro.";
+      render();
+      return;
+    }
+    state.destinationLat = Number(results[0].lat);
+    state.destinationLng = Number(results[0].lon);
+    state.destinationText = results[0].display_name.split(",").slice(0, 3).join(",");
+    state.destinationStatus = `Destino definido: ${state.destinationText}`;
+    saveState();
+    render();
+  } catch (error) {
+    state.destinationStatus = "Não consegui consultar o destino agora. Use uma sugestão ou tente de novo.";
+    render();
+  }
+}
+
+function resetDestination() {
+  const marco = destinations[0];
+  state.destinationId = marco.id;
+  state.destinationText = marco.name;
+  state.destinationLat = marco.lat;
+  state.destinationLng = marco.lng;
+  state.destinationStatus = `Destino definido: ${marco.name}`;
+  saveState();
+  render();
+}
+
 function useCurrentLocation() {
   if (!navigator.geolocation) {
     state.originStatus = "Seu navegador não liberou localização.";
@@ -638,6 +724,14 @@ document.addEventListener("click", (event) => {
     }
     if (action.dataset.action === "use-location") {
       useCurrentLocation();
+      return;
+    }
+    if (action.dataset.action === "resolve-destination") {
+      resolveDestination();
+      return;
+    }
+    if (action.dataset.action === "reset-destination") {
+      resetDestination();
       return;
     }
   }
@@ -714,6 +808,10 @@ document.addEventListener("change", (event) => {
   if (field === "originText") {
     state.originStatus = "";
     applyPresetOrigin();
+  }
+  if (field === "destinationText") {
+    state.destinationStatus = "";
+    applyPresetDestination();
   }
   saveState();
   render();
