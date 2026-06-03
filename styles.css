@@ -187,6 +187,10 @@ button {
   margin-bottom: 20px;
 }
 
+.section-subheader {
+  margin-top: 22px;
+}
+
 .section-header h3 {
   margin: 0 0 6px;
   font-size: 1.15rem;
@@ -271,6 +275,13 @@ button {
   padding: 0 14px;
 }
 
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
 .text-button {
   min-height: 36px;
   border: 0;
@@ -332,6 +343,13 @@ button {
 .parking-meta {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-top: 12px;
+}
+
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
 }
 
 .meta-item,
@@ -647,6 +665,10 @@ button {
   margin-bottom: 8px;
 }
 
+.strategic-zone {
+  transform: translate(-8%, -8%);
+}
+
 .critical-list {
   display: grid;
   gap: 12px;
@@ -672,6 +694,63 @@ button {
   color: var(--muted);
 }
 
+.mini-stack {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+}
+
+.mini-stack strong {
+  color: var(--dark);
+  font-size: 0.9rem;
+}
+
+.report-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.report-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.report-item h4 {
+  margin: 0 0 5px;
+}
+
+.report-item p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.report-item span {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.report-form {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.6fr) minmax(160px, 0.9fr) minmax(220px, 1.4fr);
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.report-form .primary-button {
+  grid-column: 1 / -1;
+}
+
 .history-list {
   display: grid;
   gap: 12px;
@@ -692,6 +771,12 @@ button {
 .history-item p {
   margin: 0;
   color: var(--muted);
+}
+
+.history-actions {
+  display: grid;
+  justify-items: end;
+  gap: 6px;
 }
 
 .empty-state {
@@ -795,6 +880,7 @@ button {
   .route-step,
   .route-total-card,
   .critical-item,
+  .report-item,
   .history-item {
     grid-template-columns: 1fr;
   }
@@ -811,8 +897,16 @@ button {
   .history-summary,
   .mode-alternatives,
   .mini-grid,
+  .report-form,
   .sidebar-metrics {
     grid-template-columns: 1fr;
+  }
+
+  .button-group,
+  .history-actions,
+  .mini-stack {
+    justify-content: stretch;
+    justify-items: start;
   }
 
   .bottom-nav {

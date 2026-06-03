@@ -125,6 +125,69 @@ const criticalAreas = [
   },
 ];
 
+const strategicRegions = [
+  {
+    id: "portuaria",
+    name: "Zona Portuária",
+    walkMinutes: 10,
+    reason: "Fica fora do miolo mais congestionado e permite seguir a pé ou de bike.",
+    traffic: "low",
+    availability: "Alta",
+    x: 17,
+    y: 62,
+  },
+  {
+    id: "santo",
+    name: "Santo Antônio",
+    walkMinutes: 12,
+    reason: "Boa área de apoio para eventos, reduzindo a disputa por vaga no Marco Zero.",
+    traffic: "medium",
+    availability: "Média",
+    x: 58,
+    y: 42,
+  },
+  {
+    id: "apolo",
+    name: "Cais do Apolo",
+    walkMinutes: 8,
+    reason: "Região intermediária para estacionar e terminar o trajeto sem circular no centro crítico.",
+    traffic: "medium",
+    availability: "Média",
+    x: 78,
+    y: 28,
+  },
+];
+
+const initialReports = [
+  {
+    id: "report-traffic",
+    category: "Trânsito",
+    title: "Trânsito intenso na Rua do Bom Jesus",
+    place: "Rua do Bom Jesus",
+    detail: "Alto fluxo agora há pouco; evite seguir de carro até o centro crítico.",
+    age: "Agora há pouco",
+    className: "status-high",
+  },
+  {
+    id: "report-vacancy",
+    category: "Vagas",
+    title: "Estac. Bairro do Recife lotado",
+    place: "Av. Alfredo Lisboa",
+    detail: "Relato de baixa disponibilidade para o horário selecionado.",
+    age: "10 min atrás",
+    className: "status-limited",
+  },
+  {
+    id: "report-street",
+    category: "Rua",
+    title: "Rua da Moeda parcialmente bloqueada",
+    place: "Rua da Moeda",
+    detail: "Trecho com retenção e circulação difícil.",
+    age: "25 min atrás",
+    className: "status-medium",
+  },
+];
+
 const state = {
   view: "search",
   sort: "score",
@@ -132,6 +195,9 @@ const state = {
   destination: "Marco Zero, Recife - PE",
   arrivalTime: "20:00",
   selectedParkingId: "paco",
+  reportFilter: "Todos",
+  reports: JSON.parse(localStorage.getItem("parkingZeroReports") || "null") || initialReports,
+  favorites: JSON.parse(localStorage.getItem("parkingZeroFavorites") || "[]"),
   history: JSON.parse(localStorage.getItem("parkingZeroHistory") || "[]"),
 };
 
@@ -141,8 +207,8 @@ const viewTitles = {
   recommended: "Melhor opção recomendada",
   route: "Resumo da rota",
   alternatives: "Alternativas após estacionar",
-  traffic: "Mapa de trânsito",
-  history: "Histórico",
+  traffic: "Regiões e relatos",
+  history: "Salvos",
 };
 
 const mainView = document.querySelector("#main-view");
@@ -228,6 +294,28 @@ function getHistorySummary() {
   };
 }
 
+function getFavoriteParkings() {
+  return state.favorites
+    .map((id) => parkingOptions.find((option) => option.id === id))
+    .filter(Boolean);
+}
+
+function isFavorite(parkingId) {
+  return state.favorites.includes(parkingId);
+}
+
+function getFilteredReports() {
+  if (state.reportFilter === "Todos") return state.reports;
+  return state.reports.filter((report) => report.category === state.reportFilter);
+}
+
+function getBestStrategicRegion() {
+  return [...strategicRegions].sort((a, b) => {
+    const trafficScore = (region) => region.traffic === "low" ? 0 : region.traffic === "medium" ? 1 : 2;
+    return trafficScore(a) - trafficScore(b) || a.walkMinutes - b.walkMinutes;
+  })[0];
+}
+
 function statusPill(traffic) {
   const status = trafficLabels[traffic];
   return `<span class="status-pill ${status.className}">${status.label}</span>`;
@@ -248,13 +336,13 @@ function renderSearch() {
       <div class="section-header">
         <div>
           <h3>Para onde você vai?</h3>
-          <p>Informe o destino e escolha como pretende seguir depois de estacionar.</p>
+          <p>Encontre estacionamentos disponíveis próximos ao destino ou evento no Recife Antigo para evitar voltas desnecessárias.</p>
         </div>
       </div>
 
       <form class="form-grid" id="search-form">
         <div class="field">
-          <label for="destination">Destino no Recife Antigo</label>
+          <label for="destination">Destino ou evento no Recife Antigo</label>
           <input id="destination" name="destination" value="${state.destination}" autocomplete="off" />
         </div>
 
@@ -296,7 +384,7 @@ function renderResults() {
       <div class="section-header">
         <div>
           <h3>Estacionamentos encontrados</h3>
-          <p>Comparação por preço, caminhada, trânsito, disponibilidade e score.</p>
+          <p>Compare preço, distância até o evento, caminhada, vagas disponíveis e congestionamento para escolher o melhor custo-benefício.</p>
         </div>
         <button class="secondary-button" type="button" data-view-jump="recommended">Ver melhor opção</button>
       </div>
@@ -378,6 +466,8 @@ function renderRecommended() {
 }
 
 function parkingCard(option, recommended) {
+  const favorite = isFavorite(option.id);
+
   return `
     <article class="parking-card ${recommended ? "is-recommended" : ""}">
       <div class="parking-main">
@@ -390,9 +480,14 @@ function parkingCard(option, recommended) {
         </div>
         <div class="parking-meta">
           <div class="meta-item"><span>Preço</span><strong>${formatCurrency(option.price)}</strong></div>
+          <div class="meta-item"><span>Até o evento</span><strong>${option.distanceMeters} m</strong></div>
           <div class="meta-item"><span>Caminhada</span><strong>${option.walkMinutes} min</strong></div>
-          <div class="meta-item"><span>Distância</span><strong>${option.distanceMeters} m</strong></div>
           <div class="meta-item"><span>Ocupação</span><strong>${option.occupancy}%</strong></div>
+        </div>
+        <div class="card-actions">
+          <button class="text-button" type="button" data-toggle-favorite="${option.id}">
+            ${favorite ? "Remover favorito" : "Salvar favorito"}
+          </button>
         </div>
       </div>
       <button class="score-badge" type="button" data-select-parking="${option.id}" aria-label="Selecionar ${option.name}">
@@ -408,6 +503,7 @@ function renderRoute() {
   const mode = getSelectedMode();
   const totalMinutes = getTotalRouteMinutes(parking, mode);
   const impact = getRouteImpact(parking, mode);
+  const favorite = isFavorite(parking.id);
 
   mainView.innerHTML = `
     <section class="section">
@@ -416,7 +512,10 @@ function renderRoute() {
           <h3>Resumo da rota</h3>
           <p>O carro para no estacionamento recomendado e o trecho final segue por ${mode.label.toLowerCase()}.</p>
         </div>
-        <button class="secondary-button" type="button" data-save-history="true">Salvar no histórico</button>
+        <div class="button-group">
+          <button class="secondary-button" type="button" data-toggle-favorite="${parking.id}">${favorite ? "Favorito salvo" : "Salvar favorito"}</button>
+          <button class="secondary-button" type="button" data-save-history="true">Salvar rota</button>
+        </div>
       </div>
 
       <div class="route-steps">
@@ -508,71 +607,116 @@ function renderAlternatives() {
 }
 
 function renderTraffic() {
+  const bestRegion = getBestStrategicRegion();
+  const filteredReports = getFilteredReports();
+
   mainView.innerHTML = `
     <section class="section">
       <div class="section-header">
         <div>
-          <h3>Mapa de trânsito</h3>
-          <p>Visualização simulada do fluxo, gargalos e baixa disponibilidade nos principais pontos do Recife Antigo.</p>
+          <h3>Regiões recomendadas</h3>
+          <p>Áreas menos congestionadas para estacionar e seguir a pé, de bike ou por outro modal até o centro crítico.</p>
         </div>
       </div>
 
-      <div class="map-panel" aria-label="Mapa de trânsito simulado">
+      <div class="map-panel" aria-label="Mapa de regiões estratégicas">
         <span class="map-road road-a"></span>
         <span class="map-road road-b"></span>
         <span class="map-road road-c"></span>
-        <div class="traffic-zone zone-low">
-          <strong>Paço Alfândega</strong>
-          ${statusPill("low")}
-        </div>
-        <div class="traffic-zone zone-medium">
-          <strong>Cais do Apolo</strong>
-          ${statusPill("medium")}
-        </div>
-        <div class="traffic-zone zone-high">
-          <strong>Marco Zero</strong>
-          ${statusPill("high")}
-        </div>
-        <div class="traffic-zone zone-limited">
-          <strong>Rua da Moeda</strong>
-          ${typedPill("Baixa disponibilidade", "status-limited")}
-        </div>
+        ${strategicRegions.map((region) => `
+          <div class="traffic-zone strategic-zone" style="left: ${region.x}%; top: ${region.y}%;">
+            <strong>${region.name}</strong>
+            ${statusPill(region.traffic)}
+          </div>
+        `).join("")}
       </div>
     </section>
 
     <section class="section">
       <div class="section-header">
         <div>
-          <h3>Áreas críticas</h3>
-          <p>Use estes alertas para evitar circular de carro depois de chegar ao estacionamento.</p>
+          <h3>Áreas estratégicas</h3>
+          <p>A recomendação distribui melhor os carros pela região e evita excesso de circulação no Marco Zero.</p>
         </div>
       </div>
       <div class="critical-list">
-        ${criticalAreas.map((area) => `
+        ${strategicRegions.map((region) => `
           <article class="critical-item">
             <div>
-              <h4>${area.name}</h4>
-              <p>${area.reason}</p>
+              <h4>${region.name}</h4>
+              <p>${region.reason}</p>
             </div>
-            ${typedPill(area.type, area.className)}
+            <div class="mini-stack">
+              ${availabilityPill(region.availability)}
+              <strong>${region.walkMinutes} min a pé</strong>
+            </div>
           </article>
         `).join("")}
       </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h3>Relatos da comunidade</h3>
+          <p>Informações em tempo real sobre trânsito, vagas indisponíveis, preços abusivos e ruas interditadas.</p>
+        </div>
+      </div>
+
+      <div class="chip-row" aria-label="Filtrar relatos">
+        ${["Todos", "Trânsito", "Vagas", "Rua", "Preço"].map((filter) => `
+          <button class="chip ${state.reportFilter === filter ? "is-active" : ""}" type="button" data-report-filter="${filter}">${filter}</button>
+        `).join("")}
+      </div>
+
+      <div class="report-list">
+        ${filteredReports.map((report) => `
+          <article class="report-item">
+            <div>
+              <h4>${report.title}</h4>
+              <p>${report.place} · ${report.detail}</p>
+              <span>${report.age}</span>
+            </div>
+            ${typedPill(report.category, report.className)}
+          </article>
+        `).join("")}
+      </div>
+
+      <form class="report-form" id="report-form">
+        <div class="field">
+          <label for="report-category">Tipo de relato</label>
+          <select id="report-category" name="category">
+            <option>Trânsito</option>
+            <option>Vagas</option>
+            <option>Rua</option>
+            <option>Preço</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="report-place">Local</label>
+          <input id="report-place" name="place" value="Rua da Moeda" autocomplete="off" />
+        </div>
+        <div class="field field-wide">
+          <label for="report-detail">O que está acontecendo?</label>
+          <input id="report-detail" name="detail" value="Relato rápido para atualizar outros usuários." autocomplete="off" />
+        </div>
+        <button class="primary-button" type="submit">Enviar relato</button>
+      </form>
     </section>
   `;
 
   contextView.innerHTML = `
     <section class="context-section">
-      <h3>Leitura rápida</h3>
-      <p>Quanto mais próximo do Marco Zero, maior o risco de congestionamento e menor a vantagem de continuar circulando de carro.</p>
+      <h3>Melhor região agora</h3>
+      <p>${bestRegion.name} aparece como alternativa estratégica para estacionar fora do maior fluxo e seguir ${bestRegion.walkMinutes} min a pé.</p>
     </section>
     <section class="context-section">
-      <h3>Código de cores</h3>
-      <div class="parking-list">
-        ${statusPill("low")}
-        ${statusPill("medium")}
-        ${statusPill("high")}
-        ${typedPill("Baixa disponibilidade", "status-limited")}
+      <h3>Relatos ativos</h3>
+      <div class="detail-grid">
+        <div class="detail-item"><span>Total</span><strong>${state.reports.length}</strong></div>
+        <div class="detail-item"><span>Filtro</span><strong>${state.reportFilter}</strong></div>
+        <div class="detail-item"><span>Trânsito</span><strong>${state.reports.filter((report) => report.category === "Trânsito").length}</strong></div>
+        <div class="detail-item"><span>Vagas</span><strong>${state.reports.filter((report) => report.category === "Vagas").length}</strong></div>
       </div>
     </section>
   `;
@@ -580,25 +724,31 @@ function renderTraffic() {
 
 function renderHistory() {
   const summary = getHistorySummary();
+  const favorites = getFavoriteParkings();
 
   mainView.innerHTML = `
     <section class="section">
       <div class="section-header">
         <div>
-          <h3>Histórico</h3>
-          <p>Rotas e estacionamentos usados ficam salvos neste navegador.</p>
+          <h3>Favoritos e histórico</h3>
+          <p>Salve estacionamentos e rotas preferidas para acessar rápido em eventos recorrentes.</p>
         </div>
-        ${state.history.length > 0 ? `<button class="secondary-button" type="button" data-clear-history="true">Limpar histórico</button>` : ""}
+        <div class="button-group">
+          <button class="secondary-button" type="button" data-toggle-favorite="${state.selectedParkingId}">
+            ${isFavorite(state.selectedParkingId) ? "Favorito salvo" : "Salvar opção atual"}
+          </button>
+          ${state.history.length > 0 ? `<button class="secondary-button" type="button" data-clear-history="true">Limpar histórico</button>` : ""}
+        </div>
       </div>
 
       <div class="history-summary" aria-label="Resumo do histórico">
         <div class="summary-card">
-          <span>Rotas salvas</span>
-          <strong>${summary.totalRoutes}</strong>
+          <span>Favoritos</span>
+          <strong>${favorites.length}</strong>
         </div>
         <div class="summary-card">
-          <span>Tempo evitado</span>
-          <strong>${summary.savedMinutes} min</strong>
+          <span>Rotas salvas</span>
+          <strong>${summary.totalRoutes}</strong>
         </div>
         <div class="summary-card">
           <span>Modal mais usado</span>
@@ -607,6 +757,42 @@ function renderHistory() {
         <div class="summary-card">
           <span>Score médio</span>
           <strong>${summary.averageScore || "-"}</strong>
+        </div>
+      </div>
+
+      <div class="section-header section-subheader">
+        <div>
+          <h3>Estacionamentos favoritos</h3>
+          <p>Opções preferidas para reutilizar sem refazer a busca.</p>
+        </div>
+      </div>
+
+      ${favorites.length === 0 ? `
+        <div class="empty-state">Nenhum estacionamento favorito ainda.</div>
+      ` : `
+        <div class="history-list">
+          ${favorites.map((parking) => `
+            <article class="history-item">
+              <div>
+                <h4>${parking.name}</h4>
+                <p>${parking.address} · ${parking.walkMinutes} min a pé · ${formatCurrency(parking.price)} · ${parking.availability} disponibilidade</p>
+              </div>
+              <div class="history-actions">
+                <strong>${calculateScore(parking)} pts</strong>
+                <button class="text-button" type="button" data-select-parking="${parking.id}">Usar</button>
+                <button class="text-button" type="button" data-toggle-favorite="${parking.id}">Remover</button>
+              </div>
+            </article>
+          `).join("")}
+        </div>
+      `}
+    </section>
+
+    <section class="section">
+      <div class="section-header section-subheader">
+        <div>
+          <h3>Rotas salvas</h3>
+          <p>Registro das escolhas usadas para voltar a uma rota em poucos toques.</p>
         </div>
       </div>
 
@@ -630,12 +816,13 @@ function renderHistory() {
 
   contextView.innerHTML = `
     <section class="context-section">
-      <h3>Uso acadêmico</h3>
-      <p>O histórico ajuda a demonstrar recorrência de escolhas, economia de tempo e padrão de mobilidade urbana.</p>
+      <h3>Acesso rápido</h3>
+      <p>Favoritos e rotas salvas reduzem o tempo de decisão em eventos recorrentes no Recife Antigo.</p>
     </section>
     <section class="context-section">
       <h3>Leitura acumulada</h3>
       <div class="detail-grid">
+        <div class="detail-item"><span>Favoritos</span><strong>${favorites.length}</strong></div>
         <div class="detail-item"><span>Rotas analisadas</span><strong>${summary.totalRoutes}</strong></div>
         <div class="detail-item"><span>Tempo evitado</span><strong>${summary.savedMinutes} min</strong></div>
         <div class="detail-item"><span>Modal dominante</span><strong>${summary.topMode}</strong></div>
@@ -705,15 +892,53 @@ function saveHistory() {
     }),
   };
 
+  if (!isFavorite(parking.id)) {
+    state.favorites = [parking.id, ...state.favorites].slice(0, 8);
+    localStorage.setItem("parkingZeroFavorites", JSON.stringify(state.favorites));
+  }
+
   state.history = [entry, ...state.history].slice(0, 6);
   localStorage.setItem("parkingZeroHistory", JSON.stringify(state.history));
   state.view = "history";
   render();
 }
 
+function toggleFavorite(parkingId) {
+  if (isFavorite(parkingId)) {
+    state.favorites = state.favorites.filter((id) => id !== parkingId);
+  } else {
+    state.favorites = [parkingId, ...state.favorites].slice(0, 8);
+  }
+
+  localStorage.setItem("parkingZeroFavorites", JSON.stringify(state.favorites));
+  render();
+}
+
 function clearHistory() {
   state.history = [];
   localStorage.removeItem("parkingZeroHistory");
+  render();
+}
+
+function addReport(data) {
+  const category = data.get("category") || "Trânsito";
+  const place = data.get("place") || "Recife Antigo";
+  const detail = data.get("detail") || "Relato enviado por usuário.";
+  const className = category === "Trânsito" ? "status-high" : category === "Vagas" ? "status-limited" : category === "Rua" ? "status-medium" : "status-high";
+
+  const report = {
+    id: `report-${Date.now()}`,
+    category,
+    title: `${category} em ${place}`,
+    place,
+    detail,
+    age: "Agora",
+    className,
+  };
+
+  state.reports = [report, ...state.reports].slice(0, 8);
+  state.reportFilter = "Todos";
+  localStorage.setItem("parkingZeroReports", JSON.stringify(state.reports));
   render();
 }
 
@@ -741,6 +966,8 @@ document.addEventListener("click", (event) => {
   const parking = event.target.closest("[data-select-parking]");
   const save = event.target.closest("[data-save-history]");
   const clear = event.target.closest("[data-clear-history]");
+  const favorite = event.target.closest("[data-toggle-favorite]");
+  const reportFilter = event.target.closest("[data-report-filter]");
 
   if (nav) {
     state.view = nav.dataset.view;
@@ -778,9 +1005,24 @@ document.addEventListener("click", (event) => {
   if (clear) {
     clearHistory();
   }
+
+  if (favorite) {
+    toggleFavorite(favorite.dataset.toggleFavorite);
+  }
+
+  if (reportFilter) {
+    state.reportFilter = reportFilter.dataset.reportFilter;
+    render();
+  }
 });
 
 document.addEventListener("submit", (event) => {
+  if (event.target.id === "report-form") {
+    event.preventDefault();
+    addReport(new FormData(event.target));
+    return;
+  }
+
   if (event.target.id !== "search-form") return;
 
   event.preventDefault();
@@ -798,6 +1040,7 @@ document.querySelector("#reset-button").addEventListener("click", () => {
   state.selectedMode = "walk";
   state.selectedParkingId = "paco";
   state.sort = "score";
+  state.reportFilter = "Todos";
   state.view = "search";
   render();
 });

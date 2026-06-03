@@ -17,20 +17,24 @@ Uber, shuttle ou ônibus.
 
 - Busca inicial com destino, horário e modo de deslocamento após estacionar.
 - Lista de estacionamentos encontrados.
-- Comparação por score, preço, distância e trânsito.
+- Comparação por score, preço, distância até o evento, caminhada, vagas
+  disponíveis e trânsito.
 - Recomendação automática da melhor opção.
 - Resumo da rota em etapas com tempo total estimado.
 - Alternativas de mobilidade após estacionar, com recomendação de troca modal.
-- Mapa de trânsito simulado com áreas críticas e baixa disponibilidade.
-- Histórico local de rotas salvas, com resumo de uso, tempo evitado e modal
-  mais usado.
+- Regiões estratégicas recomendadas para estacionar fora das zonas de maior
+  fluxo.
+- Relatos colaborativos sobre trânsito, vagas indisponíveis, preços abusivos e
+  ruas interditadas.
+- Favoritos e histórico local de rotas salvas, com resumo de uso, tempo evitado
+  e modal mais usado.
 - Indicadores de impacto no contexto lateral para reforçar a redução de
   circulação de carro na área crítica.
 
 ## Pendências de integração
 
-- Confirmar o escopo das funcionalidades 9 e 10 com o responsável antes de
-  criar telas novas ou alterar o fluxo principal.
+- Confirmar se existe uma funcionalidade 10 no escopo final antes de criar tela
+  nova ou alterar o fluxo principal.
 
 ## Validação local
 

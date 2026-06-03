@@ -29,8 +29,8 @@ editado em tempo real por mais de uma pessoa/agente.
 - `recommended`: melhor opção recomendada.
 - `route`: resumo da rota e tempo total estimado.
 - `alternatives`: troca modal após estacionar.
-- `traffic`: mapa de trânsito e áreas críticas.
-- `history`: histórico local.
+- `traffic`: regiões estratégicas e relatos colaborativos.
+- `history`: favoritos e histórico local de rotas.
 
 ## Cuidados de integração
 
@@ -47,19 +47,23 @@ editado em tempo real por mais de uma pessoa/agente.
 - Função 4: integrada em `alternatives`.
 - Função 5: integrada em `traffic`.
 - Função 6: integrada em `route`.
-- Funções 7 e 8: integradas em `history` e no contexto lateral, com resumo de
-  uso, tempo evitado, modal mais usado e indicadores de impacto.
-- Funções 9 e 10: confirmar escopo antes de criar novas views.
+- Função 7: integrada em `traffic`, com relatos colaborativos filtráveis e envio
+  de relato sobre trânsito, vagas, ruas ou preço.
+- Função 8: integrada em `traffic`, com regiões estratégicas recomendadas fora
+  das zonas de maior fluxo.
+- Função 9: integrada em `history`, com favoritos e rotas salvas para eventos
+  recorrentes.
+- Função 10: aguardar explicação se fizer parte do escopo final.
 
 ## O que ainda falta
 
-- Receber ou confirmar o escopo das funções 9 e 10 com Vinicius.
-- Revisar com a equipe se as funções 9 e 10 devem entrar em views existentes ou
-  se exigem um novo ponto do fluxo.
+- Receber ou confirmar se existe uma função 10 no escopo final.
+- Revisar com a equipe se alguma funcionalidade adicional deve entrar em views
+  existentes ou se exige um novo ponto do fluxo.
 
 ## Última validação
 
-- Integração publicada em `origin/main` no commit `fb70bb5`.
+- Integração publicada em `origin/main` no commit `5652dc6`.
 - Chrome headless abriu o app estático localmente e validou o fluxo: busca,
   comparação, rota, troca modal, salvamento no histórico e indicadores de
   impacto.
