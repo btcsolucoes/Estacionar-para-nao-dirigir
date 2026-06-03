@@ -9,130 +9,115 @@ const destinations = [
   { id: "embaixada", name: "Embaixada dos Bonecos", area: "Rua do Bom Jesus", load: 4, anchor: 5 },
   { id: "terminal", name: "Terminal Marítimo", area: "Porto do Recife", load: 2, anchor: 8 },
   { id: "alfandega", name: "Shopping Paço Alfândega", area: "Madre de Deus", load: 3, anchor: 5 },
+  { id: "bom-jesus", name: "Rua do Bom Jesus", area: "Polo gastronômico", load: 5, anchor: 5 },
+  { id: "armazem", name: "Armazém 14", area: "Porto", load: 3, anchor: 8 },
 ];
 
 const timeSlots = [
-  { value: "07:00", label: "07:00", tag: "manhã leve", pressure: 1, price: 0 },
-  { value: "08:00", label: "08:00", tag: "entrada", pressure: 2, price: 2 },
-  { value: "09:00", label: "09:00", tag: "entrada", pressure: 2, price: 2 },
-  { value: "10:00", label: "10:00", tag: "calmo", pressure: 0, price: 0 },
-  { value: "12:00", label: "12:00", tag: "almoco", pressure: 1, price: 1 },
-  { value: "14:00", label: "14:00", tag: "calmo", pressure: 0, price: 0 },
-  { value: "16:00", label: "16:00", tag: "pré-pico", pressure: 2, price: 2 },
-  { value: "17:00", label: "17:00", tag: "pico", pressure: 3, price: 4 },
-  { value: "18:00", label: "18:00", tag: "pico", pressure: 4, price: 5 },
-  { value: "19:00", label: "19:00", tag: "evento", pressure: 4, price: 6 },
-  { value: "20:00", label: "20:00", tag: "evento", pressure: 3, price: 5 },
-  { value: "21:00", label: "21:00", tag: "noite", pressure: 2, price: 3 },
-  { value: "22:00", label: "22:00", tag: "noite", pressure: 2, price: 2 },
-  { value: "23:00", label: "23:00", tag: "saída", pressure: 3, price: 2 },
+  { value: "07:00", tag: "manhã leve", pressure: 1, price: 0 },
+  { value: "08:00", tag: "entrada", pressure: 2, price: 2 },
+  { value: "09:00", tag: "entrada", pressure: 2, price: 2 },
+  { value: "10:00", tag: "calmo", pressure: 0, price: 0 },
+  { value: "12:00", tag: "almoço", pressure: 1, price: 1 },
+  { value: "14:00", tag: "calmo", pressure: 0, price: 0 },
+  { value: "16:00", tag: "pré-pico", pressure: 2, price: 2 },
+  { value: "17:00", tag: "pico", pressure: 3, price: 4 },
+  { value: "18:00", tag: "pico forte", pressure: 4, price: 5 },
+  { value: "19:00", tag: "evento", pressure: 4, price: 6 },
+  { value: "20:00", tag: "evento", pressure: 3, price: 5 },
+  { value: "21:00", tag: "noite", pressure: 2, price: 3 },
+  { value: "22:00", tag: "noite", pressure: 2, price: 2 },
+  { value: "23:00", tag: "saída", pressure: 3, price: 2 },
 ];
 
 const modes = [
-  { id: "walk", name: "A pé", short: "Pé", minutes: 0, cost: 0, note: "grátis, evita fila e é melhor para até 900 m" },
-  { id: "bike", name: "Bike", short: "Bk", minutes: -2, cost: 0, note: "bom quando a caminhada passa de 900 m" },
-  { id: "uber", name: "Uber", short: "Ub", minutes: 2, cost: 14, note: "melhor para noite ou chuva" },
-  { id: "shuttle", name: "Shuttle", short: "Sh", minutes: 4, cost: 4, note: "circular para grandes eventos" },
-  { id: "bus", name: "Ônibus", short: "On", minutes: 8, cost: 4.3, note: "barato, mas depende de intervalo" },
+  { id: "walk", name: "A pé", minutes: 0, cost: 0, note: "sem custo e sem espera" },
+  { id: "bike", name: "Bike", minutes: -2, cost: 0, note: "melhor para distâncias médias" },
+  { id: "uber", name: "Uber", minutes: 2, cost: 14, note: "bom para noite ou chuva" },
+  { id: "shuttle", name: "Shuttle", minutes: 4, cost: 4, note: "circular de evento" },
+  { id: "bus", name: "Ônibus", minutes: 8, cost: 4.3, note: "barato, mas depende de intervalo" },
 ];
 
 const parkingLots = [
-  { id: "paco", name: "Estac. Paço Alfândega", address: "Rua Madre de Deus", zone: "Centro", hourly: 18, event: 45, daily: 72, baseAvailability: 70, baseDrive: 10, baseWalk: 4, driveKm: 4.2, anchor: 5, traffic: "medio", note: "mais perto dos polos históricos" },
-  { id: "alfredo", name: "Garagem Alfredo Lisboa", address: "Av. Alfredo Lisboa", zone: "Porto", hourly: 20, event: 52, daily: 86, baseAvailability: 42, baseDrive: 13, baseWalk: 7, driveKm: 4.9, anchor: 6, traffic: "alto", note: "perto, mas sofre nos horários de evento" },
-  { id: "apolo", name: "Garagem Cais do Apolo", address: "Cais do Apolo, 222", zone: "Apolo", hourly: 15, event: 38, daily: 65, baseAvailability: 66, baseDrive: 12, baseWalk: 8, driveKm: 4.6, anchor: 2, traffic: "medio", note: "equilíbrio bom entre preço e acesso" },
-  { id: "riomar", name: "Estac. RioMar Recife", address: "Av. República do Líbano", zone: "Fora do miolo", hourly: 12, event: 35, daily: 58, baseAvailability: 84, baseDrive: 18, baseWalk: 15, driveKm: 6.8, anchor: 0, traffic: "baixo", note: "bom para deixar o carro fora do centro crítico" },
-  { id: "santo", name: "Ed. Garagem Santo Antonio", address: "Rua do Carmo", zone: "Santo Antonio", hourly: 10, event: 32, daily: 48, baseAvailability: 74, baseDrive: 16, baseWalk: 12, driveKm: 5.1, anchor: 1, traffic: "baixo", note: "barato, com trecho final maior" },
-  { id: "portuaria", name: "Zona Portuária", address: "Cais do Porto", zone: "Borda norte", hourly: 14, event: 36, daily: 60, baseAvailability: 78, baseDrive: 15, baseWalk: 10, driveKm: 5.7, anchor: 8, traffic: "baixo", note: "boa para eventos nos armazéns" },
-  { id: "bom-jesus", name: "Pátio Bom Jesus", address: "Rua do Bom Jesus", zone: "Histórico", hourly: 22, event: 58, daily: 92, baseAvailability: 35, baseDrive: 15, baseWalk: 5, driveKm: 4.5, anchor: 5, traffic: "alto", note: "conveniente, caro e disputado" },
-  { id: "capibaribe", name: "Bolso Capibaribe", address: "Rua da Aurora", zone: "Borda oeste", hourly: 9, event: 28, daily: 44, baseAvailability: 80, baseDrive: 17, baseWalk: 13, driveKm: 5.9, anchor: 2, traffic: "baixo", note: "menor preço para quem aceita caminhar mais" },
-  { id: "terminal", name: "Terminal Marítimo", address: "Av. Alfredo Lisboa, porto", zone: "Terminal", hourly: 16, event: 42, daily: 70, baseAvailability: 62, baseDrive: 14, baseWalk: 9, driveKm: 4.8, anchor: 8, traffic: "medio", note: "funciona bem para Cais do Sertão e Terminal" },
+  { id: "paco", name: "Estac. Paço Alfândega", address: "Rua Madre de Deus", zone: "Centro", hourly: 18, event: 45, daily: 72, baseAvailability: 70, baseDrive: 10, baseWalk: 4, driveKm: 4.2, anchor: 5, traffic: "médio", note: "mais perto dos polos históricos" },
+  { id: "alfredo", name: "Garagem Alfredo Lisboa", address: "Av. Alfredo Lisboa", zone: "Porto", hourly: 20, event: 52, daily: 86, baseAvailability: 42, baseDrive: 13, baseWalk: 7, driveKm: 4.9, anchor: 6, traffic: "alto", note: "perto, mas sofre em eventos" },
+  { id: "apolo", name: "Garagem Cais do Apolo", address: "Cais do Apolo, 222", zone: "Apolo", hourly: 15, event: 38, daily: 65, baseAvailability: 66, baseDrive: 12, baseWalk: 8, driveKm: 4.6, anchor: 2, traffic: "médio", note: "equilíbrio entre preço e acesso" },
+  { id: "riomar", name: "Estac. RioMar Recife", address: "Av. República do Líbano", zone: "Fora do miolo", hourly: 12, event: 35, daily: 58, baseAvailability: 84, baseDrive: 18, baseWalk: 15, driveKm: 6.8, anchor: 0, traffic: "baixo", note: "bom para deixar o carro fora do centro" },
+  { id: "santo", name: "Ed. Garagem Santo Antônio", address: "Rua do Carmo", zone: "Santo Antônio", hourly: 10, event: 32, daily: 48, baseAvailability: 74, baseDrive: 16, baseWalk: 12, driveKm: 5.1, anchor: 1, traffic: "baixo", note: "barato, com trecho final maior" },
+  { id: "portuaria", name: "Zona Portuária", address: "Cais do Porto", zone: "Borda norte", hourly: 14, event: 36, daily: 60, baseAvailability: 78, baseDrive: 15, baseWalk: 10, driveKm: 5.7, anchor: 8, traffic: "baixo", note: "boa para Cais e Terminal" },
+  { id: "bomjesus", name: "Pátio Bom Jesus", address: "Rua do Bom Jesus", zone: "Histórico", hourly: 22, event: 58, daily: 92, baseAvailability: 35, baseDrive: 15, baseWalk: 5, driveKm: 4.5, anchor: 5, traffic: "alto", note: "conveniente, caro e disputado" },
+  { id: "capibaribe", name: "Bolso Capibaribe", address: "Rua da Aurora", zone: "Borda oeste", hourly: 9, event: 28, daily: 44, baseAvailability: 80, baseDrive: 17, baseWalk: 13, driveKm: 5.9, anchor: 2, traffic: "baixo", note: "menor preço para quem aceita caminhar" },
+  { id: "terminal", name: "Terminal Marítimo", address: "Av. Alfredo Lisboa", zone: "Terminal", hourly: 16, event: 42, daily: 70, baseAvailability: 62, baseDrive: 14, baseWalk: 9, driveKm: 4.8, anchor: 8, traffic: "médio", note: "funciona bem perto dos armazéns" },
 ];
 
-const baseReports = [
+const defaultReports = [
   { type: "Trânsito", place: "Rua do Bom Jesus", detail: "fluxo intenso perto dos bares", minutes: 8 },
   { type: "Vagas", place: "Paço Alfândega", detail: "poucas vagas cobertas", minutes: 14 },
-  { type: "Rua", place: "Rua da Moeda", detail: "trecho com bloqueio parcial", minutes: 23 },
-  { type: "Preço", place: "Garagem Alfredo Lisboa", detail: "pacote de evento acima da média", minutes: 31 },
+  { type: "Rua", place: "Rua da Moeda", detail: "bloqueio parcial para montagem", minutes: 23 },
+  { type: "Preço", place: "Garagem Alfredo Lisboa", detail: "pacote acima da média", minutes: 31 },
 ];
 
-const criticalAreas = [
-  { name: "Rua do Bom Jesus", reason: "alto fluxo de pedestres e bares", level: "alto" },
-  { name: "Rua da Moeda", reason: "bloqueios parciais em eventos", level: "medio" },
-  { name: "Madre de Deus", reason: "procura alta por vagas cobertas", level: "alto" },
-];
-
-const strategicRegions = [
-  { name: "Zona Portuária", reason: "pouco movimento e boa caminhada para o Cais", walk: "10 min" },
-  { name: "Santo Antônio", reason: "preço menor e acesso por ponte", walk: "12 min" },
-  { name: "Borda Capibaribe", reason: "saída mais simples no fim do evento", walk: "13 min" },
-];
-
-const viewTitles = {
-  plan: "Planejar estacionamento",
-  compare: "Comparar opções",
-  route: "Resumo da rota",
-  map: "Mapa e relatos",
-  saved: "Histórico e favoritos",
-};
-
-const elements = {
-  main: document.getElementById("main-view"),
-  context: document.getElementById("context-view"),
-  title: document.getElementById("view-title"),
-  nav: document.querySelector(".bottom-nav"),
-  reset: document.getElementById("reset-button"),
-};
-
-const store = readStore();
 const state = {
-  view: "plan",
+  view: "overview",
   destinationId: "marco-zero",
   time: "20:00",
   modeId: "walk",
-  selectedLotId: "paco",
+  profile: "balanced",
   sort: "score",
-  filter: "all",
-  favorites: store.favorites,
-  history: store.history,
-  reports: store.reports,
+  selectedLotId: "paco",
+  favorites: readStore().favorites,
+  history: readStore().history,
+  reports: readStore().reports,
+};
+
+const els = {
+  view: document.getElementById("app-view"),
+  destination: document.getElementById("destination-select"),
+  time: document.getElementById("time-select"),
+  profile: document.getElementById("profile-select"),
+  modes: document.getElementById("mode-tabs"),
+  reset: document.getElementById("reset-button"),
+  flow: document.getElementById("status-flow"),
+  saving: document.getElementById("status-saving"),
+  options: document.getElementById("status-options"),
 };
 
 function readStore() {
   try {
-    const saved = JSON.parse(localStorage.getItem("parking-zero-store") || "{}");
+    const raw = JSON.parse(localStorage.getItem("parking-zero-v3") || "{}");
     return {
-      favorites: Array.isArray(saved.favorites) ? saved.favorites : [],
-      history: Array.isArray(saved.history) ? saved.history : [],
-      reports: Array.isArray(saved.reports) ? saved.reports : baseReports,
+      favorites: Array.isArray(raw.favorites) ? raw.favorites : [],
+      history: Array.isArray(raw.history) ? raw.history : [],
+      reports: Array.isArray(raw.reports) ? raw.reports : defaultReports,
     };
   } catch (error) {
-    return { favorites: [], history: [], reports: baseReports };
+    return { favorites: [], history: [], reports: defaultReports };
   }
 }
 
-function saveStore() {
+function persist() {
   localStorage.setItem(
-    "parking-zero-store",
+    "parking-zero-v3",
     JSON.stringify({
       favorites: state.favorites,
-      history: state.history.slice(0, 10),
+      history: state.history.slice(0, 12),
       reports: state.reports.slice(0, 12),
     }),
   );
 }
 
-function byId(list, id) {
+function findBy(list, value) {
   return list.find(function (item) {
-    return item.id === id || item.value === id;
+    return item.id === value || item.value === value;
   }) || list[0];
-}
-
-function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, value));
 }
 
 function money(value) {
   return "R$ " + value.toFixed(value % 1 === 0 ? 0 : 2).replace(".", ",");
+}
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
 }
 
 function escapeHtml(value) {
@@ -144,582 +129,466 @@ function escapeHtml(value) {
     .replace(/'/g, "&#039;");
 }
 
-function scenario() {
-  const destination = byId(destinations, state.destinationId);
-  const slot = byId(timeSlots, state.time);
+function currentScenario() {
+  const destination = findBy(destinations, state.destinationId);
+  const slot = findBy(timeSlots, state.time);
   const pressure = clamp(destination.load + slot.pressure, 1, 10);
   return { destination: destination, slot: slot, pressure: pressure };
 }
 
 function enrichedLots() {
-  const data = scenario();
-  const mode = byId(modes, state.modeId);
+  const scenario = currentScenario();
+  const mode = findBy(modes, state.modeId);
   return parkingLots.map(function (lot) {
-    const distancePenalty = Math.abs(lot.anchor - data.destination.anchor);
-    const trafficPenalty = lot.traffic === "alto" ? 7 : lot.traffic === "medio" ? 4 : 1;
-    const availability = clamp(
-      lot.baseAvailability - data.pressure * 5 - distancePenalty * 3 - (lot.traffic === "alto" ? 7 : 0),
-      6,
-      96,
-    );
-    const walk = clamp(lot.baseWalk + distancePenalty * 2 + Math.round(data.destination.load / 2), 3, 24);
-    const drive = clamp(lot.baseDrive + data.pressure * 2 + trafficPenalty, 8, 42);
-    const finalLeg = Math.max(3, walk + mode.minutes);
-    const eventPrice = lot.event + data.slot.price;
-    const score = clamp(
-      Math.round(112 - eventPrice * 0.55 - drive * 0.6 - finalLeg + availability * 0.65),
-      12,
-      98,
-    );
+    const distance = Math.abs(lot.anchor - scenario.destination.anchor);
+    const trafficPenalty = lot.traffic === "alto" ? 7 : lot.traffic === "médio" ? 4 : 1;
+    const availability = clamp(lot.baseAvailability - scenario.pressure * 5 - distance * 3 - trafficPenalty, 6, 96);
+    const walkRaw = clamp(lot.baseWalk + distance * 2 + Math.round(scenario.destination.load / 2), 3, 24);
+    const finalWalk = Math.max(3, walkRaw + mode.minutes);
+    const drive = clamp(lot.baseDrive + scenario.pressure * 2 + trafficPenalty, 8, 42);
+    const eventPrice = lot.event + scenario.slot.price;
+    const score = clamp(Math.round(112 - eventPrice * 0.55 - drive * 0.6 - finalWalk + availability * 0.65), 12, 98);
     return Object.assign({}, lot, {
       availability: Math.round(availability),
       occupancy: 100 - Math.round(availability),
-      walk: finalLeg,
-      walkRaw: walk,
+      walkRaw: walkRaw,
+      walk: finalWalk,
       drive: drive,
-      total: drive + finalLeg,
+      total: drive + finalWalk,
       eventPrice: eventPrice,
-      modalCost: mode.cost,
       totalCost: eventPrice + mode.cost,
+      modalCost: mode.cost,
       score: score,
-      distancePenalty: distancePenalty,
     });
   });
 }
 
-function orderedLots() {
-  let list = enrichedLots();
-  if (state.filter === "cheap") {
-    list = list.filter(function (lot) {
-      return lot.eventPrice <= 38;
-    });
-  }
-  if (state.filter === "available") {
-    list = list.filter(function (lot) {
-      return lot.availability >= 55;
-    });
-  }
-  if (state.filter === "near") {
-    list = list.filter(function (lot) {
-      return lot.walkRaw <= 10;
-    });
-  }
+function sortedLots() {
+  const list = enrichedLots();
+  const profileSort = {
+    cheap: "price",
+    fast: "total",
+    safe: "availability",
+    balanced: state.sort,
+  }[state.profile];
   list.sort(function (a, b) {
-    if (state.sort === "price") return a.eventPrice - b.eventPrice;
-    if (state.sort === "walk") return a.walk - b.walk;
-    if (state.sort === "availability") return b.availability - a.availability;
-    if (state.sort === "drive") return a.drive - b.drive;
+    if (profileSort === "price") return a.eventPrice - b.eventPrice;
+    if (profileSort === "walk") return a.walk - b.walk;
+    if (profileSort === "total") return a.total - b.total;
+    if (profileSort === "availability") return b.availability - a.availability;
     return b.score - a.score;
   });
   return list;
 }
 
 function selectedLot() {
-  const list = enrichedLots();
-  return byId(list, state.selectedLotId);
+  return findBy(enrichedLots(), state.selectedLotId);
 }
 
-function recommendedLot() {
-  return orderedLots()[0] || enrichedLots()[0];
+function bestLot() {
+  return sortedLots()[0];
 }
 
-function statusClass(value) {
-  if (value >= 60) return "status-good";
-  if (value >= 32) return "status-warn";
-  return "status-bad";
+function badgeClass(value) {
+  if (value >= 60) return "good";
+  if (value >= 35) return "warn";
+  return "bad";
 }
 
-function setView(view) {
-  state.view = view;
-  render();
+function populateControls() {
+  els.destination.innerHTML = destinations.map(function (destination) {
+    return `<option value="${destination.id}">${destination.name} - ${destination.area}</option>`;
+  }).join("");
+  els.time.innerHTML = timeSlots.map(function (slot) {
+    return `<option value="${slot.value}">${slot.value} - ${slot.tag}</option>`;
+  }).join("");
+  els.modes.innerHTML = modes.map(function (mode) {
+    return `<button type="button" data-mode="${mode.id}">${mode.name}</button>`;
+  }).join("");
 }
 
-function setSelectedLot(id) {
-  state.selectedLotId = id;
-  const lot = selectedLot();
-  const data = scenario();
-  state.history = [
-    {
-      id: Date.now(),
-      lotId: lot.id,
-      lotName: lot.name,
-      destination: data.destination.name,
-      time: state.time,
-      price: lot.totalCost,
-      total: lot.total,
-    },
-  ].concat(state.history.filter(function (item) {
-    return item.lotId !== lot.id || item.destination !== data.destination.name;
-  })).slice(0, 10);
-  saveStore();
+function syncControls() {
+  els.destination.value = state.destinationId;
+  els.time.value = state.time;
+  els.profile.value = state.profile;
+  document.querySelectorAll("[data-mode]").forEach(function (button) {
+    button.classList.toggle("is-active", button.dataset.mode === state.modeId);
+  });
+  document.querySelectorAll("[data-view]").forEach(function (button) {
+    button.classList.toggle("is-active", button.dataset.view === state.view);
+  });
 }
 
-function toggleFavorite(id) {
-  if (state.favorites.indexOf(id) >= 0) {
-    state.favorites = state.favorites.filter(function (favorite) {
-      return favorite !== id;
-    });
-  } else {
-    state.favorites = [id].concat(state.favorites).slice(0, 12);
-  }
-  saveStore();
+function updateHeader() {
+  const scenario = currentScenario();
+  const best = bestLot();
+  els.flow.textContent = scenario.pressure >= 8 ? "Intenso" : scenario.pressure >= 5 ? "Moderado" : "Leve";
+  els.saving.textContent = Math.max(8, Math.round((100 - best.score) / 2)) + " min";
+  els.options.textContent = sortedLots().length;
 }
 
 function render() {
-  const best = recommendedLot();
-  if (!state.selectedLotId) state.selectedLotId = best.id;
-  elements.title.textContent = viewTitles[state.view];
-  document.querySelectorAll(".nav-item").forEach(function (button) {
-    button.classList.toggle("is-active", button.dataset.view === state.view);
-  });
+  state.selectedLotId = state.selectedLotId || bestLot().id;
+  syncControls();
+  updateHeader();
   if (state.view === "compare") renderCompare();
-  if (state.view === "route") renderRoute();
-  if (state.view === "map") renderMap();
-  if (state.view === "saved") renderSaved();
-  if (state.view === "plan") renderPlan();
-  renderContext();
+  else if (state.view === "route") renderRoute();
+  else if (state.view === "map") renderMap();
+  else if (state.view === "saved") renderSaved();
+  else renderOverview();
 }
 
-function renderPlan() {
-  const data = scenario();
-  const best = recommendedLot();
-  elements.main.innerHTML = `
-    <section class="section planner-section">
-      <div class="section-header">
-        <div>
-          <h3>Escolha destino, horário e deslocamento final</h3>
-          <p>O protótipo recalcula preço, vagas, congestionamento e tempo total.</p>
-        </div>
+function renderOverview() {
+  const lot = bestLot();
+  const scenario = currentScenario();
+  state.selectedLotId = lot.id;
+  els.view.innerHTML = `
+    <div class="dashboard-grid">
+      <div class="stack">
+        <section class="panel">
+          <div class="decision">
+            <div>
+              <span class="badge blue">Recomendado agora</span>
+              <h2>${lot.name}</h2>
+              <p>${lot.note}. Para ${scenario.destination.name} às ${state.time}, essa opção equilibra custo, vagas e tempo sem obrigar o motorista a circular no miolo.</p>
+            </div>
+            <div class="score"><strong>${lot.score}</strong><span>score</span></div>
+          </div>
+          <div class="metrics">
+            ${metric("Pacote", money(lot.eventPrice), "hora " + money(lot.hourly) + " / diária " + money(lot.daily))}
+            ${metric("Tempo total", lot.total + " min", lot.drive + " carro + " + lot.walk + " final")}
+            ${metric("Vagas", lot.availability + "%", lot.occupancy + "% de ocupação")}
+            ${metric("Destino", scenario.destination.name, scenario.destination.area)}
+          </div>
+          <div class="actions">
+            <button class="primary-button" type="button" data-select="${lot.id}" data-go="route">Usar esta rota</button>
+            <button class="secondary-button" type="button" data-go="compare">Comparar preços</button>
+            <button class="secondary-button" type="button" data-favorite="${lot.id}">${isFavorite(lot.id) ? "Remover favorito" : "Salvar favorito"}</button>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Top 4 opções</h3>
+              <p>Preço, disponibilidade e tempo lado a lado.</p>
+            </div>
+          </div>
+          <div class="lot-grid">
+            ${sortedLots().slice(0, 4).map(compactLot).join("")}
+          </div>
+        </section>
       </div>
-      <form class="planner-form" id="planner-form">
-        <label class="field">
-          <span>Destino</span>
-          <select name="destination">
-            ${destinations.map(function (item) {
-              return `<option value="${item.id}" ${item.id === state.destinationId ? "selected" : ""}>${item.name} - ${item.area}</option>`;
-            }).join("")}
-          </select>
-        </label>
-        <label class="field">
-          <span>Horário de chegada</span>
-          <select name="time">
-            ${timeSlots.map(function (slot) {
-              return `<option value="${slot.value}" ${slot.value === state.time ? "selected" : ""}>${slot.label} - ${slot.tag}</option>`;
-            }).join("")}
-          </select>
-        </label>
-        <div class="field">
-          <span>Depois de estacionar</span>
-          <div class="mode-grid">
-            ${modes.map(function (mode) {
-              return `<button class="mode-button ${mode.id === state.modeId ? "is-selected" : ""}" type="button" data-mode="${mode.id}">
-                <span>${mode.short}</span>${mode.name}
-              </button>`;
-            }).join("")}
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h3>Mapa operacional</h3>
+            <p>Verde: estacionar. Amarelo/vermelho: evitar circular.</p>
           </div>
         </div>
-      </form>
-    </section>
-
-    <section class="section">
-      <div class="decision-card">
-        <div>
-          <span class="pill">Melhor escolha agora</span>
-          <h3>${best.name}</h3>
-          <p>${best.note}. Para ${data.destination.name} às ${state.time}, entrega o melhor equilíbrio entre custo, disponibilidade e tempo.</p>
-        </div>
-        <div class="score-box">
-          <strong>${best.score}</strong>
-          <span>score</span>
-        </div>
-      </div>
-      <div class="metric-grid">
-        ${metric("Preço pacote", money(best.eventPrice), "hora " + money(best.hourly) + " / diária " + money(best.daily))}
-        ${metric("Tempo total", best.total + " min", best.drive + " min carro + " + best.walk + " min final")}
-        ${metric("Vagas prováveis", best.availability + "%", best.occupancy + "% de ocupação")}
-        ${metric("Destino", data.destination.name, data.destination.area)}
-      </div>
-      <div class="button-row">
-        <button class="primary-button" type="button" data-action="accept-best" data-id="${best.id}">Usar esta opção</button>
-        <button class="secondary-button" type="button" data-view="compare">Ver todos os preços</button>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section-header">
-        <div>
-          <h3>Opções rápidas</h3>
-          <p>Mais horários, destinos e preços em um resumo único.</p>
-        </div>
-      </div>
-      <div class="quick-grid">
-        ${orderedLots().slice(0, 4).map(compactLotCard).join("")}
-      </div>
-    </section>
+        ${mapMarkup()}
+      </section>
+    </div>
   `;
 }
 
-function metric(label, value, hint) {
-  return `<div class="metric-card"><span>${label}</span><strong>${value}</strong><p>${hint}</p></div>`;
+function metric(label, value, help) {
+  return `<article class="metric"><span>${label}</span><strong>${value}</strong><p>${help}</p></article>`;
 }
 
-function compactLotCard(lot) {
+function compactLot(lot) {
   return `
-    <article class="compact-lot">
-      <div>
-        <h4>${lot.name}</h4>
-        <p>${lot.zone} - ${lot.note}</p>
+    <article class="lot-card ${state.selectedLotId === lot.id ? "is-selected" : ""}">
+      <div class="lot-top">
+        <div>
+          <span class="badge ${badgeClass(lot.availability)}">${lot.availability}% vagas</span>
+          <h3>${lot.name}</h3>
+          <p>${lot.zone} - ${lot.note}</p>
+        </div>
+        <div class="mini-score">${lot.score}</div>
       </div>
-      <strong>${money(lot.eventPrice)}</strong>
-      <span>${lot.total} min total</span>
-      <button class="text-button" type="button" data-select-lot="${lot.id}" data-next-view="route">Selecionar</button>
+      <div class="metrics">
+        ${metric("Pacote", money(lot.eventPrice), "hora " + money(lot.hourly))}
+        ${metric("Total", lot.total + " min", lot.drive + " + " + lot.walk)}
+        ${metric("Diária", money(lot.daily), "uso longo")}
+        ${metric("Trânsito", lot.traffic, lot.address)}
+      </div>
+      <div class="actions">
+        <button class="primary-button" type="button" data-select="${lot.id}" data-go="route">Escolher</button>
+        <button class="secondary-button" type="button" data-favorite="${lot.id}">${isFavorite(lot.id) ? "Salvo" : "Salvar"}</button>
+      </div>
     </article>
   `;
 }
 
 function renderCompare() {
-  const lots = orderedLots();
-  elements.main.innerHTML = `
-    <section class="section">
-      <div class="section-header">
+  els.view.innerHTML = `
+    <section class="panel">
+      <div class="panel-header">
         <div>
-          <h3>Compare por preço, vagas, distância e trânsito</h3>
-          <p>Use os filtros para ver a opção mais barata, mais perto ou com menor risco de lotação.</p>
+          <h2>Comparação direta</h2>
+          <p>Ordene do jeito que você quer decidir: score, preço, caminhada, tempo ou vagas.</p>
         </div>
       </div>
       <div class="toolbar">
-        ${chip("score", "Melhor score", "sort")}
-        ${chip("price", "Menor preço", "sort")}
-        ${chip("walk", "Menor caminhada", "sort")}
-        ${chip("availability", "Mais vagas", "sort")}
-        ${chip("drive", "Menor carro", "sort")}
-      </div>
-      <div class="toolbar secondary-toolbar">
-        ${chip("all", "Todos", "filter")}
-        ${chip("cheap", "Até R$ 38", "filter")}
-        ${chip("available", "Vagas altas", "filter")}
-        ${chip("near", "Até 10 min a pé", "filter")}
+        ${chip("score", "Melhor score")}
+        ${chip("price", "Menor preço")}
+        ${chip("walk", "Menor caminhada")}
+        ${chip("total", "Menor tempo")}
+        ${chip("availability", "Mais vagas")}
       </div>
     </section>
-    <section class="lot-list">
-      ${lots.map(lotCard).join("")}
-      ${lots.length ? "" : `<div class="empty-state">Nenhuma opção nesse filtro. Tente remover um critério.</div>`}
+    <section class="lot-grid">
+      ${sortedLots().map(compactLot).join("")}
     </section>
   `;
 }
 
-function chip(value, label, type) {
-  const active = type === "sort" ? state.sort === value : state.filter === value;
-  return `<button class="chip ${active ? "is-active" : ""}" type="button" data-${type}="${value}">${label}</button>`;
-}
-
-function lotCard(lot) {
-  const favorite = state.favorites.indexOf(lot.id) >= 0;
-  const selected = state.selectedLotId === lot.id;
-  return `
-    <article class="section lot-card ${selected ? "is-selected" : ""}">
-      <div class="lot-heading">
-        <div>
-          <span class="pill ${statusClass(lot.availability)}">${lot.availability}% vagas</span>
-          <h3>${lot.name}</h3>
-          <p>${lot.address} - ${lot.note}</p>
-        </div>
-        <div class="score-box compact">
-          <strong>${lot.score}</strong>
-          <span>score</span>
-        </div>
-      </div>
-      <div class="metric-grid lot-metrics">
-        ${metric("Hora", money(lot.hourly), "valor base")}
-        ${metric("Pacote", money(lot.eventPrice), "evento/periodo")}
-        ${metric("Diária", money(lot.daily), "uso prolongado")}
-        ${metric("Tempo", lot.total + " min", lot.drive + " carro + " + lot.walk + " final")}
-        ${metric("Ocupação", lot.occupancy + "%", lot.traffic === "alto" ? "trânsito alto" : lot.traffic === "medio" ? "trânsito médio" : "trânsito baixo")}
-        ${metric("Zona", lot.zone, lot.walkRaw + " min a pé bruto")}
-      </div>
-      <div class="button-row">
-        <button class="primary-button" type="button" data-select-lot="${lot.id}" data-next-view="route">${selected ? "Opção selecionada" : "Escolher e ver rota"}</button>
-        <button class="secondary-button" type="button" data-toggle-favorite="${lot.id}">${favorite ? "Remover favorito" : "Salvar favorito"}</button>
-      </div>
-    </article>
-  `;
+function chip(value, label) {
+  return `<button class="chip ${state.sort === value ? "is-active" : ""}" type="button" data-sort="${value}">${label}</button>`;
 }
 
 function renderRoute() {
   const lot = selectedLot();
-  const data = scenario();
-  const mode = byId(modes, state.modeId);
-  elements.main.innerHTML = `
-    <section class="section">
-      <div class="section-header">
-        <div>
-          <h3>${lot.name} até ${data.destination.name}</h3>
-          <p>Resumo do deslocamento completo considerando carro, estacionamento e trecho final.</p>
+  const scenario = currentScenario();
+  const mode = findBy(modes, state.modeId);
+  els.view.innerHTML = `
+    <div class="dashboard-grid">
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Rota: ${lot.name}</h2>
+            <p>${scenario.destination.name} às ${state.time}. Custo total previsto: ${money(lot.totalCost)}.</p>
+          </div>
+          <span class="badge ${badgeClass(lot.availability)}">${lot.availability}% vagas</span>
         </div>
-        <span class="pill">${money(lot.totalCost)}</span>
-      </div>
-      <div class="route-board">
-        ${routeLeg("1", "Ir de carro até o estacionamento", lot.drive + " min", lot.driveKm.toFixed(1).replace(".", ",") + " km até " + lot.zone)}
-        ${routeLeg("2", "Estacionar", money(lot.eventPrice), lot.availability + "% de disponibilidade prevista")}
-        ${routeLeg("3", "Seguir de " + mode.name + " até o destino", lot.walk + " min", mode.note + " - custo " + money(mode.cost))}
-      </div>
-      <div class="route-total">
-        <div>
-          <span>Tempo total estimado</span>
-          <strong>${lot.total} min</strong>
+        <div class="route-list">
+          ${routeStep(1, "Dirigir até o estacionamento", lot.drive + " min", lot.driveKm.toFixed(1).replace(".", ",") + " km até " + lot.zone)}
+          ${routeStep(2, "Estacionar", money(lot.eventPrice), "Pacote do horário selecionado")}
+          ${routeStep(3, "Seguir de " + mode.name, lot.walk + " min", mode.note + " - custo " + money(mode.cost))}
         </div>
-        <div>
-          <span>Custo previsto</span>
-          <strong>${money(lot.totalCost)}</strong>
+        <div class="metrics">
+          ${metric("Tempo total", lot.total + " min", "trajeto completo")}
+          ${metric("Custo", money(lot.totalCost), "estacionamento + modal")}
+          ${metric("Risco", lot.occupancy + "%", "ocupação prevista")}
+          ${metric("Score", lot.score, "custo-benefício")}
         </div>
-        <div>
-          <span>Risco de lotação</span>
-          <strong>${lot.occupancy}%</strong>
+        <div class="actions">
+          <button class="primary-button" type="button" data-save-route="${lot.id}">Salvar rota</button>
+          <button class="secondary-button" type="button" data-go="map">Ver relatos</button>
         </div>
-      </div>
-      <div class="button-row">
-        <button class="primary-button" type="button" data-action="save-route">Salvar rota</button>
-        <button class="secondary-button" type="button" data-view="map">Ver mapa e relatos</button>
-      </div>
-    </section>
+      </section>
 
-    <section class="section">
-      <div class="section-header">
-        <div>
-          <h3>Trocar modal final</h3>
-          <p>Escolha outra forma de sair do estacionamento sem refazer a busca.</p>
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h3>Trocar modal final</h3>
+            <p>O tempo e o custo recalculam na hora.</p>
+          </div>
         </div>
-      </div>
-      <div class="modal-grid">
-        ${modes.map(function (modeItem) {
-          const active = modeItem.id === state.modeId;
-          const minutes = Math.max(3, lot.walkRaw + modeItem.minutes);
-          return `<button class="modal-card ${active ? "is-selected" : ""}" type="button" data-mode="${modeItem.id}">
-            <strong>${modeItem.name}</strong>
-            <span>${minutes} min - ${money(modeItem.cost)}</span>
-            <p>${modeItem.note}</p>
-          </button>`;
-        }).join("")}
-      </div>
-    </section>
+        <div class="lot-grid">
+          ${modes.map(function (modeItem) {
+            const active = modeItem.id === state.modeId;
+            const minutes = Math.max(3, lot.walkRaw + modeItem.minutes);
+            return `<button class="lot-card ${active ? "is-selected" : ""}" type="button" data-mode="${modeItem.id}">
+              <div class="lot-top">
+                <div><h3>${modeItem.name}</h3><p>${modeItem.note}</p></div>
+                <strong>${minutes} min</strong>
+              </div>
+              <span>${money(modeItem.cost)}</span>
+            </button>`;
+          }).join("")}
+        </div>
+      </section>
+    </div>
   `;
 }
 
-function routeLeg(index, title, value, detail) {
-  return `
-    <article class="route-leg">
-      <span class="step-index">${index}</span>
-      <div>
-        <h4>${title}</h4>
-        <p>${detail}</p>
-      </div>
-      <strong>${value}</strong>
-    </article>
-  `;
+function routeStep(index, title, value, help) {
+  return `<article class="route-card"><span class="step">${index}</span><div><h3>${title}</h3><p>${help}</p></div><strong>${value}</strong></article>`;
 }
 
 function renderMap() {
-  elements.main.innerHTML = `
-    <section class="section">
-      <div class="section-header">
-        <div>
-          <h3>Áreas críticas e regiões estratégicas</h3>
-          <p>Mapa esquemático para visualizar onde evitar circular e onde estacionar melhor.</p>
+  els.view.innerHTML = `
+    <div class="dashboard-grid">
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Mapa e regiões</h2>
+            <p>Use como referência para evitar áreas críticas e escolher bolsões menos congestionados.</p>
+          </div>
         </div>
-      </div>
-      <div class="map-board" aria-label="Mapa esquemático do Recife Antigo">
-        <div class="map-road road-one"></div>
-        <div class="map-road road-two"></div>
-        <div class="map-road road-three"></div>
-        <div class="map-marker marker-bad" style="left: 58%; top: 26%;">Bom Jesus</div>
-        <div class="map-marker marker-warn" style="left: 47%; top: 52%;">Moeda</div>
-        <div class="map-marker marker-good" style="left: 23%; top: 64%;">Santo Antônio</div>
-        <div class="map-marker marker-good" style="left: 71%; top: 68%;">Portuária</div>
-        <div class="map-marker marker-good" style="left: 18%; top: 24%;">Capibaribe</div>
-      </div>
-      <div class="split-grid">
-        <div>
-          <h4>Evitar agora</h4>
-          ${criticalAreas.map(function (area) {
-            return `<article class="info-row"><strong>${area.name}</strong><span>${area.reason}</span></article>`;
-          }).join("")}
+        ${mapMarkup()}
+        <div class="split-grid" style="margin-top:12px">
+          <div class="panel">
+            <h3>Evitar</h3>
+            ${infoRow("Rua do Bom Jesus", "Fluxo alto de pedestres e bares")}
+            ${infoRow("Rua da Moeda", "Bloqueios parciais em eventos")}
+            ${infoRow("Madre de Deus", "Alta procura por vaga coberta")}
+          </div>
+          <div class="panel">
+            <h3>Recomendadas</h3>
+            ${infoRow("Zona Portuária", "Boa caminhada para Cais e Terminal")}
+            ${infoRow("Santo Antônio", "Preço menor e saída simples")}
+            ${infoRow("Borda Capibaribe", "Menos retenção no fim do evento")}
+          </div>
         </div>
-        <div>
-          <h4>Recomendadas</h4>
-          ${strategicRegions.map(function (area) {
-            return `<article class="info-row"><strong>${area.name}</strong><span>${area.reason} - ${area.walk}</span></article>`;
-          }).join("")}
-        </div>
-      </div>
-    </section>
+      </section>
 
-    <section class="section">
-      <div class="section-header">
-        <div>
-          <h3>Relatos da comunidade</h3>
-          <p>Informações em tempo real sobre trânsito, vagas, ruas e preços.</p>
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Relatos</h2>
+            <p>Atualizações simuladas de trânsito, vagas, rua e preço.</p>
+          </div>
         </div>
-      </div>
-      <form class="report-form" id="report-form">
-        <select name="type" aria-label="Tipo do relato">
-          <option>Trânsito</option>
-          <option>Vagas</option>
-          <option>Rua</option>
-          <option>Preço</option>
-        </select>
-        <input name="place" placeholder="Local" required />
-        <input name="detail" placeholder="O que aconteceu?" required />
-        <button class="primary-button" type="submit">Enviar relato</button>
-      </form>
-      <div class="report-list">
-        ${state.reports.map(function (report) {
-          return `<article class="report-item">
-            <div>
-              <span class="pill">${escapeHtml(report.type)}</span>
-              <h4>${escapeHtml(report.place)}</h4>
-              <p>${escapeHtml(report.detail)}</p>
-            </div>
-            <strong>${report.minutes} min</strong>
-          </article>`;
-        }).join("")}
-      </div>
-    </section>
+        <form class="report-form" id="report-form">
+          <select name="type"><option>Trânsito</option><option>Vagas</option><option>Rua</option><option>Preço</option></select>
+          <input name="place" placeholder="Local" required />
+          <input name="detail" placeholder="Relato" required />
+          <button class="primary-button" type="submit">Enviar</button>
+        </form>
+        <div class="lot-grid">
+          ${state.reports.map(function (report) {
+            return `<article class="report-card"><div><span class="badge blue">${escapeHtml(report.type)}</span><h3>${escapeHtml(report.place)}</h3><p>${escapeHtml(report.detail)}</p></div><strong>${report.minutes} min</strong></article>`;
+          }).join("")}
+        </div>
+      </section>
+    </div>
   `;
+}
+
+function mapMarkup() {
+  return `
+    <div class="map-preview">
+      <div class="road road-a"></div>
+      <div class="road road-b"></div>
+      <div class="road road-c"></div>
+      <div class="map-pin bad" style="left:58%;top:25%">Bom Jesus</div>
+      <div class="map-pin warn" style="left:47%;top:52%">Rua da Moeda</div>
+      <div class="map-pin good" style="left:23%;top:65%">Santo Antônio</div>
+      <div class="map-pin good" style="left:72%;top:68%">Zona Portuária</div>
+      <div class="map-pin good" style="left:18%;top:25%">Capibaribe</div>
+    </div>
+  `;
+}
+
+function infoRow(title, detail) {
+  return `<article class="saved-card"><div><h3>${title}</h3><p>${detail}</p></div></article>`;
 }
 
 function renderSaved() {
   const favoriteLots = state.favorites.map(function (id) {
-    return byId(enrichedLots(), id);
+    return findBy(enrichedLots(), id);
   });
-  elements.main.innerHTML = `
-    <section class="section">
-      <div class="section-header">
-        <div>
-          <h3>Favoritos</h3>
-          <p>Estacionamentos e rotas para usar de novo em eventos recorrentes.</p>
+  els.view.innerHTML = `
+    <div class="dashboard-grid">
+      <section class="panel">
+        <div class="panel-header"><div><h2>Favoritos</h2><p>Estacionamentos salvos para usar de novo.</p></div></div>
+        <div class="lot-grid">
+          ${favoriteLots.length ? favoriteLots.map(compactLot).join("") : `<div class="empty-state">Nenhum favorito salvo ainda.</div>`}
         </div>
-      </div>
-      <div class="saved-list">
-        ${favoriteLots.length ? favoriteLots.map(compactLotCard).join("") : `<div class="empty-state">Nenhum favorito salvo ainda.</div>`}
-      </div>
-    </section>
-    <section class="section">
-      <div class="section-header">
-        <div>
-          <h3>Histórico de escolhas</h3>
-          <p>Últimas rotas simuladas no protótipo.</p>
+      </section>
+      <section class="panel">
+        <div class="panel-header"><div><h2>Histórico</h2><p>Últimas escolhas feitas no protótipo.</p></div></div>
+        <div class="lot-grid">
+          ${state.history.length ? state.history.map(function (item) {
+            return `<article class="saved-card"><div><h3>${escapeHtml(item.lotName)}</h3><p>${escapeHtml(item.destination)} às ${escapeHtml(item.time)} - ${item.total} min</p></div><strong>${money(item.price)}</strong></article>`;
+          }).join("") : `<div class="empty-state">Escolha uma rota para iniciar o histórico.</div>`}
         </div>
-      </div>
-      <div class="saved-list">
-        ${state.history.length ? state.history.map(function (item) {
-          return `<article class="history-card">
-            <div>
-              <h4>${escapeHtml(item.lotName)}</h4>
-              <p>${escapeHtml(item.destination)} às ${escapeHtml(item.time)} - ${item.total} min</p>
-            </div>
-            <strong>${money(item.price)}</strong>
-          </article>`;
-        }).join("") : `<div class="empty-state">Escolha uma opção para iniciar o histórico.</div>`}
-      </div>
-    </section>
+      </section>
+    </div>
   `;
 }
 
-function renderContext() {
-  const data = scenario();
+function isFavorite(id) {
+  return state.favorites.indexOf(id) >= 0;
+}
+
+function selectLot(id) {
+  state.selectedLotId = id;
   const lot = selectedLot();
-  const best = recommendedLot();
-  const mode = byId(modes, state.modeId);
-  elements.context.innerHTML = `
-    <section class="context-section">
-      <h3>Busca atual</h3>
-      <div class="context-stack">
-        ${contextLine("Destino", data.destination.name)}
-      ${contextLine("Horário", state.time + " - " + data.slot.tag)}
-        ${contextLine("Modal final", mode.name)}
-      ${contextLine("Pressão da área", data.pressure + "/10")}
-      </div>
-    </section>
-    <section class="context-section">
-      <h3>Selecionado</h3>
-      <div class="selected-summary">
-        <strong>${lot.name}</strong>
-        <span>${money(lot.totalCost)} - ${lot.total} min - ${lot.availability}% vagas</span>
-      </div>
-      <button class="primary-button" type="button" data-view="route">Ver rota</button>
-    </section>
-    <section class="context-section">
-      <h3>Melhor score</h3>
-      <div class="selected-summary">
-        <strong>${best.name}</strong>
-        <span>${best.score} pontos - ${money(best.eventPrice)} pacote</span>
-      </div>
-      <button class="secondary-button" type="button" data-select-lot="${best.id}" data-next-view="route">Usar recomendado</button>
-    </section>
-  `;
+  const scenario = currentScenario();
+  state.history = [{
+    id: Date.now(),
+    lotId: lot.id,
+    lotName: lot.name,
+    destination: scenario.destination.name,
+    time: state.time,
+    total: lot.total,
+    price: lot.totalCost,
+  }].concat(state.history.filter(function (item) {
+    return item.lotId !== lot.id || item.destination !== scenario.destination.name || item.time !== state.time;
+  })).slice(0, 12);
+  persist();
 }
 
-function contextLine(label, value) {
-  return `<div class="context-line"><span>${label}</span><strong>${value}</strong></div>`;
+function toggleFavorite(id) {
+  if (isFavorite(id)) {
+    state.favorites = state.favorites.filter(function (favorite) {
+      return favorite !== id;
+    });
+  } else {
+    state.favorites = [id].concat(state.favorites);
+  }
+  persist();
 }
 
 document.addEventListener("click", function (event) {
-  const target = event.target.closest("button");
-  if (!target) return;
+  const button = event.target.closest("button");
+  if (!button) return;
 
-  if (target.dataset.view) {
-    setView(target.dataset.view);
-    return;
-  }
-
-  if (target.dataset.mode) {
-    state.modeId = target.dataset.mode;
+  if (button.dataset.view) {
+    state.view = button.dataset.view;
     render();
     return;
   }
 
-  if (target.dataset.sort) {
-    state.sort = target.dataset.sort;
+  if (button.dataset.go) {
+    state.view = button.dataset.go;
     render();
     return;
   }
 
-  if (target.dataset.filter) {
-    state.filter = target.dataset.filter;
+  if (button.dataset.mode) {
+    state.modeId = button.dataset.mode;
     render();
     return;
   }
 
-  if (target.dataset.selectLot) {
-    setSelectedLot(target.dataset.selectLot);
-    setView(target.dataset.nextView || state.view);
-    return;
-  }
-
-  if (target.dataset.toggleFavorite) {
-    toggleFavorite(target.dataset.toggleFavorite);
+  if (button.dataset.sort) {
+    state.sort = button.dataset.sort;
+    state.profile = "balanced";
     render();
     return;
   }
 
-  if (target.dataset.action === "accept-best") {
-    setSelectedLot(target.dataset.id);
-    setView("route");
+  if (button.dataset.select) {
+    selectLot(button.dataset.select);
+    if (button.dataset.go) state.view = button.dataset.go;
+    render();
     return;
   }
 
-  if (target.dataset.action === "save-route") {
-    setSelectedLot(state.selectedLotId);
-    setView("saved");
+  if (button.dataset.favorite) {
+    toggleFavorite(button.dataset.favorite);
+    render();
+    return;
+  }
+
+  if (button.dataset.saveRoute) {
+    selectLot(button.dataset.saveRoute);
+    state.view = "saved";
+    render();
   }
 });
 
-document.addEventListener("change", function (event) {
-  if (!event.target.closest("#planner-form")) return;
-  const form = event.target.form;
-  state.destinationId = form.elements.destination.value;
-  state.time = form.elements.time.value;
-  state.selectedLotId = recommendedLot().id;
+document.getElementById("search-form").addEventListener("change", function () {
+  state.destinationId = els.destination.value;
+  state.time = els.time.value;
+  state.profile = els.profile.value;
+  state.selectedLotId = bestLot().id;
   render();
 });
 
@@ -733,20 +602,21 @@ document.addEventListener("submit", function (event) {
     detail: form.elements.detail.value.trim(),
     minutes: 0,
   }].concat(state.reports).slice(0, 12);
-  saveStore();
+  persist();
   render();
 });
 
-elements.reset.addEventListener("click", function () {
-  state.view = "plan";
+els.reset.addEventListener("click", function () {
+  state.view = "overview";
   state.destinationId = "marco-zero";
   state.time = "20:00";
   state.modeId = "walk";
+  state.profile = "balanced";
   state.sort = "score";
-  state.filter = "all";
-  state.selectedLotId = recommendedLot().id;
+  state.selectedLotId = bestLot().id;
   render();
 });
 
-state.selectedLotId = recommendedLot().id;
+populateControls();
+state.selectedLotId = bestLot().id;
 render();

@@ -4,77 +4,61 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Parking Zero</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=ux3" />
   </head>
   <body>
-    <div class="app-shell">
-      <aside class="sidebar" aria-label="Resumo do projeto">
-        <div>
+    <div class="app">
+      <header class="app-header">
+        <div class="brand-block">
           <p class="eyebrow">Recife Antigo</p>
           <h1>Parking Zero</h1>
-          <p class="sidebar-copy">
-            Estacione em um ponto estratégico e siga até o destino sem circular
-            de carro pela área mais congestionada.
-          </p>
+          <p>Planeje onde estacionar, compare custos e evite circular no centro crítico.</p>
         </div>
-
-        <div class="sidebar-metrics" aria-label="Indicadores simulados">
-          <div>
-            <span>Fluxo atual</span>
-            <strong>Moderado</strong>
-          </div>
-          <div>
-            <span>Economia média</span>
-            <strong>18 min</strong>
-          </div>
-          <div>
-            <span>Opções</span>
-            <strong>4 vagas</strong>
-          </div>
+        <div class="header-status" aria-label="Resumo operacional">
+          <div><span>Fluxo</span><strong id="status-flow">Moderado</strong></div>
+          <div><span>Economia</span><strong id="status-saving">18 min</strong></div>
+          <div><span>Opções</span><strong id="status-options">9</strong></div>
         </div>
-      </aside>
+      </header>
 
-      <main class="workspace">
-        <header class="topbar">
-          <div>
-          <p class="eyebrow">Protótipo acadêmico</p>
-          <h2 id="view-title">Planejar estacionamento</h2>
-          </div>
-          <button class="ghost-button" id="reset-button" type="button">
-            Limpar busca
-          </button>
-        </header>
+      <main class="planner">
+        <section class="search-panel" aria-label="Planejamento">
+          <form class="search-form" id="search-form">
+            <label>
+              <span>Destino</span>
+              <select id="destination-select" name="destination"></select>
+            </label>
+            <label>
+              <span>Chegada</span>
+              <select id="time-select" name="time"></select>
+            </label>
+            <label>
+              <span>Perfil</span>
+              <select id="profile-select" name="profile">
+                <option value="balanced">Equilíbrio</option>
+                <option value="cheap">Menor preço</option>
+                <option value="fast">Menor tempo</option>
+                <option value="safe">Mais vagas</option>
+              </select>
+            </label>
+            <button type="button" id="reset-button">Limpar</button>
+          </form>
 
-        <section class="content-grid">
-          <div class="primary-panel" id="main-view"></div>
-          <aside class="context-panel" id="context-view"></aside>
+          <div class="mode-tabs" id="mode-tabs" aria-label="Modal final"></div>
         </section>
 
-        <nav class="bottom-nav" aria-label="Navegação principal">
-          <button class="nav-item is-active" type="button" data-view="plan">
-            <span class="nav-icon" aria-hidden="true">B</span>
-            Planejar
-          </button>
-          <button class="nav-item" type="button" data-view="compare">
-            <span class="nav-icon" aria-hidden="true">C</span>
-            Comparar
-          </button>
-          <button class="nav-item" type="button" data-view="route">
-            <span class="nav-icon" aria-hidden="true">R</span>
-            Rota
-          </button>
-          <button class="nav-item" type="button" data-view="map">
-            <span class="nav-icon" aria-hidden="true">M</span>
-            Mapa
-          </button>
-          <button class="nav-item" type="button" data-view="saved">
-            <span class="nav-icon" aria-hidden="true">H</span>
-            Salvos
-          </button>
+        <nav class="view-tabs" aria-label="Navegação">
+          <button class="is-active" type="button" data-view="overview">Visão geral</button>
+          <button type="button" data-view="compare">Comparar</button>
+          <button type="button" data-view="route">Rota</button>
+          <button type="button" data-view="map">Mapa e relatos</button>
+          <button type="button" data-view="saved">Salvos</button>
         </nav>
+
+        <section id="app-view" class="view-shell" aria-live="polite"></section>
       </main>
     </div>
 
-    <script src="app.js" defer></script>
+    <script src="app.js?v=ux3" defer></script>
   </body>
 </html>
