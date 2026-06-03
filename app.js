@@ -6,6 +6,7 @@ const parkingOptions = [
     price: 18,
     walkMinutes: 5,
     driveMinutes: 12,
+    driveKm: 4.2,
     distanceMeters: 420,
     availability: "Alta",
     traffic: "low",
@@ -18,6 +19,7 @@ const parkingOptions = [
     price: 12,
     walkMinutes: 15,
     driveMinutes: 18,
+    driveKm: 6.4,
     distanceMeters: 980,
     availability: "Média",
     traffic: "medium",
@@ -30,6 +32,7 @@ const parkingOptions = [
     price: 20,
     walkMinutes: 8,
     driveMinutes: 22,
+    driveKm: 5.1,
     distanceMeters: 610,
     availability: "Baixa",
     traffic: "high",
@@ -42,6 +45,7 @@ const parkingOptions = [
     price: 15,
     walkMinutes: 11,
     driveMinutes: 15,
+    driveKm: 4.8,
     distanceMeters: 760,
     availability: "Média",
     traffic: "medium",
@@ -56,6 +60,7 @@ const modeOptions = [
     icon: "A",
     minutes: 5,
     cost: "R$ 0,00",
+    detail: "Grátis",
     impact: "Mais rápido e econômico para um trecho final curto.",
   },
   {
@@ -64,6 +69,7 @@ const modeOptions = [
     icon: "B",
     minutes: 3,
     cost: "R$ 4,00",
+    detail: "~150 kcal",
     impact: "Boa opção quando há bicicleta compartilhada próxima.",
   },
   {
@@ -72,6 +78,7 @@ const modeOptions = [
     icon: "U",
     minutes: 4,
     cost: "R$ 11,00",
+    detail: "R$ 10 - 15",
     impact: "Útil em chuva, bagagem ou baixa mobilidade.",
   },
   {
@@ -80,6 +87,7 @@ const modeOptions = [
     icon: "S",
     minutes: 7,
     cost: "R$ 0,00",
+    detail: "R$ 4,00",
     impact: "Reduz carros individuais em eventos e horários de pico.",
   },
   {
@@ -88,6 +96,7 @@ const modeOptions = [
     icon: "O",
     minutes: 10,
     cost: "R$ 4,10",
+    detail: "Linha local",
     impact: "Alternativa coletiva para deslocamentos um pouco maiores.",
   },
 ];
@@ -103,25 +112,33 @@ const criticalAreas = [
     name: "Marco Zero",
     type: "Muito congestionado",
     className: "status-high",
-    reason: "Alta concentração de veículos e pedestres no destino final.",
+    reason: "Trânsito intenso e alta concentração de veículos e pedestres no destino final.",
+    x: 35,
+    y: 72,
   },
   {
     name: "Cais do Apolo",
     type: "Congestionamento moderado",
     className: "status-medium",
     reason: "Retenção no acesso aos estacionamentos e áreas de embarque.",
+    x: 74,
+    y: 22,
   },
   {
-    name: "Paço Alfândega",
-    type: "Pouco movimento",
-    className: "status-low",
-    reason: "Ponto estratégico para parar o carro e seguir sem circular no centro.",
+    name: "Estac. Bairro do Recife",
+    type: "Alta lotação",
+    className: "status-high",
+    reason: "Ocupação elevada e risco de perda de tempo procurando vaga.",
+    x: 65,
+    y: 55,
   },
   {
     name: "Rua da Moeda",
-    type: "Baixa disponibilidade",
+    type: "Bloqueio parcial",
     className: "status-limited",
-    reason: "Evitar procurar vaga avulsa nessa região no horário selecionado.",
+    reason: "Rua parcialmente bloqueada e baixa disponibilidade de vagas avulsas.",
+    x: 18,
+    y: 38,
   },
 ];
 
@@ -510,11 +527,29 @@ function renderRoute() {
       <div class="section-header">
         <div>
           <h3>Resumo da rota</h3>
-          <p>O carro para no estacionamento recomendado e o trecho final segue por ${mode.label.toLowerCase()}.</p>
+          <p>Tempo total calculado com percurso de carro, estacionamento escolhido e trecho final até o destino.</p>
         </div>
         <div class="button-group">
           <button class="secondary-button" type="button" data-toggle-favorite="${parking.id}">${favorite ? "Favorito salvo" : "Salvar favorito"}</button>
           <button class="secondary-button" type="button" data-save-history="true">Salvar rota</button>
+        </div>
+      </div>
+
+      <div class="route-metrics" aria-label="Estimativa detalhada da rota">
+        <div class="route-metric">
+          <span>Até o estacionamento</span>
+          <strong>${parking.driveMinutes} min</strong>
+          <p>${parking.driveKm.toFixed(1)} km de carro até ${parking.name}.</p>
+        </div>
+        <div class="route-metric">
+          <span>Trecho final</span>
+          <strong>${mode.minutes} min</strong>
+          <p>${parking.distanceMeters} m usando ${mode.label.toLowerCase()} até ${state.destination}.</p>
+        </div>
+        <div class="route-metric">
+          <span>Tempo total estimado</span>
+          <strong>${totalMinutes} min</strong>
+          <p>Previsão da viagem completa, do carro ao destino.</p>
         </div>
       </div>
 
@@ -523,7 +558,7 @@ function renderRoute() {
           <span class="step-index">1</span>
           <div>
             <h4>Ir até ${parking.name}</h4>
-            <p>${parking.driveMinutes} min de carro até uma área com melhor condição para estacionar.</p>
+            <p>${parking.driveMinutes} min de carro, ${parking.driveKm.toFixed(1)} km, até uma área com melhor condição para estacionar.</p>
           </div>
           ${statusPill(parking.traffic)}
         </div>
@@ -554,6 +589,8 @@ function renderRoute() {
         <strong>${totalMinutes} min</strong>
       </div>
 
+      <button class="primary-button route-start" type="button" data-view-jump="alternatives">Iniciar navegação</button>
+
       <div class="impact-grid" aria-label="Impacto estimado da escolha">
         <div class="impact-card">
           <span>Tempo evitado</span>
@@ -581,9 +618,13 @@ function renderAlternatives() {
       <div class="section-header">
         <div>
           <h3>Alternativas após estacionar</h3>
-          <p>Compare o trecho final a partir de ${parking.name}. Recomendamos ${recommendedMode.label.toLowerCase()} para esta rota.</p>
+          <p>Depois de estacionar em ${parking.name}, escolha como chegar ao destino sem voltar a circular de carro pelo Recife Antigo.</p>
         </div>
         <button class="secondary-button" type="button" data-view-jump="route">Voltar para rota</button>
+      </div>
+      <div class="modal-recommendation">
+        <strong>Recomendamos: ${recommendedMode.label}</strong>
+        <p>${recommendedMode.impact}</p>
       </div>
       <div class="mode-alternatives">
         ${modeOptions.map((item) => `
@@ -593,6 +634,7 @@ function renderAlternatives() {
             <div class="mini-grid">
               <div class="mini-item"><span>Tempo</span><strong>${item.minutes} min</strong></div>
               <div class="mini-item"><span>Custo</span><strong>${item.cost}</strong></div>
+              <div class="mini-item"><span>Detalhe</span><strong>${item.detail}</strong></div>
               <div class="mini-item"><span>Status</span><strong>${item.id === recommendedMode.id ? "Recomendado" : "Disponível"}</strong></div>
               <div class="mini-item"><span>Total rota</span><strong>${getTotalRouteMinutes(parking, item)} min</strong></div>
             </div>
@@ -600,6 +642,7 @@ function renderAlternatives() {
           </article>
         `).join("")}
       </div>
+      <button class="primary-button route-start" type="button" data-view-jump="route">Iniciar rota</button>
     </section>
   `;
 
@@ -614,12 +657,12 @@ function renderTraffic() {
     <section class="section">
       <div class="section-header">
         <div>
-          <h3>Regiões recomendadas</h3>
-          <p>Áreas menos congestionadas para estacionar e seguir a pé, de bike ou por outro modal até o centro crítico.</p>
+          <h3>Mapa de trânsito e regiões</h3>
+          <p>Visualize trânsito intenso, alta lotação, bloqueios, baixa disponibilidade e áreas estratégicas antes de circular pelo Recife Antigo.</p>
         </div>
       </div>
 
-      <div class="map-panel" aria-label="Mapa de regiões estratégicas">
+      <div class="map-panel" aria-label="Mapa de trânsito, áreas críticas e regiões estratégicas">
         <span class="map-road road-a"></span>
         <span class="map-road road-b"></span>
         <span class="map-road road-c"></span>
@@ -628,6 +671,32 @@ function renderTraffic() {
             <strong>${region.name}</strong>
             ${statusPill(region.traffic)}
           </div>
+        `).join("")}
+        ${criticalAreas.map((area) => `
+          <div class="traffic-zone critical-zone" style="left: ${area.x}%; top: ${area.y}%;">
+            <strong>${area.name}</strong>
+            ${typedPill(area.type, area.className)}
+          </div>
+        `).join("")}
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h3>Áreas críticas</h3>
+          <p>Evite regiões com trânsito intenso, alta lotação, bloqueios ou pouca disponibilidade de vagas.</p>
+        </div>
+      </div>
+      <div class="critical-list">
+        ${criticalAreas.map((area) => `
+          <article class="critical-item">
+            <div>
+              <h4>${area.name}</h4>
+              <p>${area.reason}</p>
+            </div>
+            ${typedPill(area.type, area.className)}
+          </article>
         `).join("")}
       </div>
     </section>
@@ -709,6 +778,15 @@ function renderTraffic() {
     <section class="context-section">
       <h3>Melhor região agora</h3>
       <p>${bestRegion.name} aparece como alternativa estratégica para estacionar fora do maior fluxo e seguir ${bestRegion.walkMinutes} min a pé.</p>
+    </section>
+    <section class="context-section">
+      <h3>Alertas críticos</h3>
+      <div class="detail-grid">
+        <div class="detail-item"><span>Áreas críticas</span><strong>${criticalAreas.length}</strong></div>
+        <div class="detail-item"><span>Maior risco</span><strong>Marco Zero</strong></div>
+        <div class="detail-item"><span>Bloqueio</span><strong>Rua da Moeda</strong></div>
+        <div class="detail-item"><span>Lotação</span><strong>Bairro do Recife</strong></div>
+      </div>
     </section>
     <section class="context-section">
       <h3>Relatos ativos</h3>
