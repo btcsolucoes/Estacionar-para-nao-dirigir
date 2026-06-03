@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Parking Zero</title>
+    <link rel="stylesheet" href="styles.css?v=ux3" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="app-header">
+        <div class="brand-block">
+          <p class="eyebrow">Recife Antigo</p>
+          <h1>Parking Zero</h1>
+          <p>Planeje onde estacionar, compare custos e evite circular no centro crítico.</p>
+        </div>
+        <div class="header-status" aria-label="Resumo operacional">
+          <div><span>Fluxo</span><strong id="status-flow">Moderado</strong></div>
+          <div><span>Economia</span><strong id="status-saving">18 min</strong></div>
+          <div><span>Opções</span><strong id="status-options">9</strong></div>
+        </div>
+      </header>
+
+      <main class="planner">
+        <section class="search-panel" aria-label="Planejamento">
+          <form class="search-form" id="search-form">
+            <label>
+              <span>Destino</span>
+              <select id="destination-select" name="destination"></select>
+            </label>
+            <label>
+              <span>Chegada</span>
+              <select id="time-select" name="time"></select>
+            </label>
+            <label>
+              <span>Perfil</span>
+              <select id="profile-select" name="profile">
+                <option value="balanced">Equilíbrio</option>
+                <option value="cheap">Menor preço</option>
+                <option value="fast">Menor tempo</option>
+                <option value="safe">Mais vagas</option>
+              </select>
+            </label>
+            <button type="button" id="reset-button">Limpar</button>
+          </form>
+
+          <div class="mode-tabs" id="mode-tabs" aria-label="Modal final"></div>
+        </section>
+
+        <nav class="view-tabs" aria-label="Navegação">
+          <button class="is-active" type="button" data-view="overview">Visão geral</button>
+          <button type="button" data-view="compare">Comparar</button>
+          <button type="button" data-view="route">Rota</button>
+          <button type="button" data-view="map">Mapa e relatos</button>
+          <button type="button" data-view="saved">Salvos</button>
+        </nav>
+
+        <section id="app-view" class="view-shell" aria-live="polite"></section>
+      </main>
+    </div>
+
+    <script src="app.js?v=ux3" defer></script>
+  </body>
+</html>
