@@ -293,7 +293,7 @@ function selectOptions(items, selected, labelKey = "name") {
 function render() {
   const app = document.getElementById("app");
   app.innerHTML = `
-    <section class="app-shell">
+    <section class="app-shell" data-tab="${state.tab}">
       <aside class="panel">
         ${renderHeader()}
         ${renderControls()}
@@ -316,7 +316,7 @@ function renderHeader() {
         <p>Parking Zero</p>
         <h1>Estacione melhor. Dirija menos.</h1>
       </div>
-      <strong>${totalMinutes(best)} min</strong>
+      <strong>${formatMinutes(totalMinutes(best))}</strong>
     </header>
   `;
 }
@@ -736,7 +736,7 @@ document.addEventListener("click", (event) => {
     }
   }
 
-  const tab = event.target.closest("[data-tab]");
+  const tab = event.target.closest("button[data-tab]");
   if (tab) {
     setTab(tab.dataset.tab);
     return;
